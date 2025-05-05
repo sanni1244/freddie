@@ -1,0 +1,29 @@
+.hero-section {
+    background-image: url('/images/back.png');
+    height: 90vh;
+    color: white;
+    background-size: 90% 100%;
+    position: relative;
+    background-position: center;
+}
+
+.portfolio-look{
+    border: 16px solid rgb(255, 43, 16);
+    border-radius: 50%;
+}
+
+.hero-image {
+    /* filter: blur(1px);
+    opacity: 0.8;
+    transition: all 0.3s ease-in-out;
+    animation: fadeIn 1s ease-in-out forwards;
+    animation-delay: 0.5s; */
+    border-radius: 50%;
+    background-color: rgba(70, 65, 64, 0.808);
+    border: 16px solid rgb(70, 65, 64);
+
+}
+.me-image{
+    border-radius: 50%;
+    object-fit: cover;
+}
