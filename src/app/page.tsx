@@ -1,75 +1,40 @@
-import Image from "next/image";
-import "./styles/hero.css";
-import Logo from "./components/logo";
+"use client";
+
 import Link from "next/link";
+import { Briefcase, Users, FileText, ClipboardList, Send, Globe, Activity } from "lucide-react";
+
+const pages = [
+  { name: "Managers", path: "./pages/managers", icon: Users },
+  { name: "Identities", path: "/identities", icon: FileText },
+  { name: "Jobs", path: "/jobs", icon: Briefcase },
+  { name: "Form Templates", path: "/form-templates", icon: ClipboardList },
+  { name: "Form Actions", path: "/form-actions", icon: Send },
+  { name: "Form Responses", path: "/form-responses", icon: Activity },
+  { name: "Public Form Links", path: "/public-links", icon: Globe },
+];
 
 export default function Home() {
   return (
-    <>
-      <header>
-        <nav className="flex justify-between items-center p-4">
-          <span className="flex items-center gap-2">
-            <Logo />
-            <b>portfolio</b>
-          </span>
-          <span className="flex gap-4">
-            <Link href="/">Home</Link>
-            <Link href="/about">About</Link>
-            <Link href="/contact">Contact</Link>
-          </span>
-          <Link href="/switch">Switch</Link>
-
-        </nav>
-      </header>
-      <main>
-        <div className="hero-section flex justify-around items-center p-4">
-          <div className="hero-content w-2/5 bg-gray-900 text-white flex flex-col justify-center items-start p-12">
-
-
-
-
-
-              {/* Logo or Initials */}
-              <div className="mb-8">
-                <div className="text-3xl font-bold flex items-center gap-2"><Logo /> O.S</div> 
+    <main className="min-h-screen px-6 py-10 bg-gradient-to-b from-white via-gray-50 to-gray-100">
+      <div className="max-w-5xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8 text-gray-800">Freddie Admin Dashboard</h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {pages.map(({ name, path, icon: Icon }) => (
+            <Link
+              key={path}
+              href={path}
+              className="bg-white rounded-2xl shadow-md p-6 flex items-center space-x-4 hover:scale-[1.03] transition-all hover:shadow-lg group"
+            >
+              <div className="p-3 rounded-full bg-blue-100 text-blue-700 group-hover:bg-blue-600 group-hover:text-white transition">
+                <Icon size={24} />
               </div>
-
-              {/* Name */}
-              <h1 className="text-5xl font-extrabold mb-4">Opeyemi Sanni</h1>
-
-              {/* Title */}
-              <h2 className="">
-                Full Stack Developer | Data Analyst | AI Enthusiast
-              </h2>
-
-              {/* Short Intro */}
-              <p className="text-lg text-gray-400 leading-relaxed">
-                Passionate about building intelligent, scalable, and user-friendly applications. Exploring the intersection of AI and software development.
-              </p>
-
-              {/* Optional: Buttons */}
-              <div className="mt-8 flex space-x-4">
-                <button className="bg-white text-gray-900 px-6 py-2 rounded-full font-semibold hover:bg-gray-300 transition">
-                  Contact Me
-                </button>
-                <button className="border border-white px-6 py-2 rounded-full font-semibold hover:bg-gray-700 transition">
-                  Portfolio
-                </button>
-              </div>
-
-            </div>
-            <div className="hero-image">
-              <Image
-                src="/images/devimg.png"
-                alt="Hero Image"
-                width={400}
-                height={400}
-                priority
-                className="me-image"
-              />
-            </div>
-          </div>
-      </main>
-    </>
+              <span className="text-lg font-medium text-gray-700 group-hover:text-blue-700 transition">
+                {name}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </main>
   );
 }
