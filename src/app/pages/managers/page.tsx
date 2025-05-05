@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import { motion } from "framer-motion";
 import { FaBuilding, FaCalendarAlt } from "react-icons/fa";
+import BackButton from "@/app/components/backbutton";
 
 type Manager = {
   id: string;
@@ -26,6 +28,7 @@ export default function HomePage() {
   const [managers, setManagers] = useState<Manager[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
     const fetchManagers = async () => {
@@ -52,9 +55,9 @@ export default function HomePage() {
   if (error) return <p className="text-center text-red-500 mt-10">{error}</p>;
 
   return (
-    <div className="min-h-screen px-6 py-10 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 text-white">
+    <div className="relative min-h-screen px-6 py-10 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 text-white">
       <h1 className="text-4xl font-bold text-center mb-12">Managers</h1>
-
+      <BackButton />
       <div className="space-y-12 max-w-5xl mx-auto">
         {Object.entries(grouped).map(([name, group]) => (
           <div key={name}>
@@ -72,11 +75,19 @@ export default function HomePage() {
                     <FaBuilding className="text-indigo-300" />
                     <span>{manager.companyName === "None" ? "No Company" : manager.companyName}</span>
                   </p>
-                  <p className="text-sm text-gray-200 mt-2"><strong>Description:</strong>  {manager.companyDescription || "No description."}</p>
+                  <p className="text-sm text-gray-200 mt-2">
+                    <strong>Description:</strong> {manager.companyDescription || "No description."}
+                  </p>
                   <p className="text-sm text-gray-300 mt-2 flex items-center gap-2">
                     <FaCalendarAlt />
                     Joined {getDaysAgo(manager.createdAt)}
                   </p>
+                  <button
+                    onClick={() => router.push(`./identities`)}
+                    className="mt-4 inline-block text-sm bg-indigo-600 hover:bg-indigo-700 text-white py-1.5 px-3 rounded-lg transition"
+                  >
+                    View Identities
+                  </button>
                 </motion.div>
               ))}
             </div>

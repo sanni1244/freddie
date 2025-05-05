@@ -5,8 +5,8 @@ import { Briefcase, Users, FileText, ClipboardList, Send, Globe, Activity } from
 
 const pages = [
   { name: "Managers", path: "./pages/managers", icon: Users },
-  { name: "Identities", path: "/identities", icon: FileText },
-  { name: "Jobs", path: "/jobs", icon: Briefcase },
+  { name: "Identities", path: "./pages/identities/editmanager", icon: FileText },
+  { name: "Jobs", path: "./pages/jobs", icon: Briefcase },
   { name: "Form Templates", path: "/form-templates", icon: ClipboardList },
   { name: "Form Actions", path: "/form-actions", icon: Send },
   { name: "Form Responses", path: "/form-responses", icon: Activity },
