@@ -1,4 +1,4 @@
-Overview
+# Overview
 This project involves building a production-grade frontend module using Next.js 13 with TypeScript, integrated with the Freddie API. 
 
 Tech Stack
