@@ -2,10 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
-import SuccessMessage from '../../components/success';
-import ErrorMessage from '../../components/error';
-import Back from '../../components/backbutton';
-import DisplayTemplates from '../../components/display/displaytemplate';
 import CreateTemplate from '../../components/create/createtemplate';
 import EditTemplate from '../../components/edit/edittemplate';
 import { Manager, FormTemplate } from '@/types'; 
@@ -104,17 +100,6 @@ const FormTemplatesPage = () => {
         </select>
       </div>
       {loading && <p className="text-blue-600 font-medium animate-pulse">Loading...</p>}
-
-      {selectedManagerId && (
-        <DisplayTemplates 
-          templates={templates}
-          onEdit={handleEdit}
-          onDelete={handleTemplateDeleted}
-          setLoading={setLoading}
-          setMessage={setMessage}
-          selectedManagerId={selectedManagerId}
-        />
-      )}
 
       {selectedManagerId && !isEditing && (
         <CreateTemplate 

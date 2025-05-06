@@ -1,7 +1,6 @@
 'use client';
 import React, { useState } from 'react';
 import { Managerdetails } from '@/types';
-import ErrorMessage from '@/app/components/error';
 import api from '@/lib/api';
 
 interface CreateManagerProps {
