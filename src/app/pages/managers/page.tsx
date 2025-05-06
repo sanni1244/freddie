@@ -1,99 +1,153 @@
-"use client";
+// pages/managers/index.tsx
+'use client';
+import React, { useState, useEffect } from 'react';
+import { Managerdetails } from '@/types';
+import { motion, AnimatePresence } from 'framer-motion';
+import DisplayManagers from '../../components/display/displaymanagers';
+import CreateManager from '../../components/create/createmanager';
+import EditManager from '../../components/edit/editmanager';
+import SuccessMessage from '@/app/components/success';
+import ErrorMessage from '@/app/components/error';
+import api from '@/lib/api';
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import api from "@/lib/api";
-import { motion } from "framer-motion";
-import { FaBuilding, FaCalendarAlt } from "react-icons/fa";
-import BackButton from "@/app/components/backbutton";
-
-type Manager = {
-  id: string;
-  fullName: string;
-  email: string;
-  companyName: string;
-  companyDescription: string;
-  createdAt: string;
-};
-
-const getDaysAgo = (date: string) => {
-  const days = Math.floor((new Date().getTime() - new Date(date).getTime()) / (1000 * 3600 * 24));
-  return isNaN(days) ? "N/A" : `${days} days ago`;
-};
-
-const capitalize = (str: string) =>
-  str.replace(/\b\w/g, (char) => char.toUpperCase());
-
-export default function HomePage() {
-  const [managers, setManagers] = useState<Manager[]>([]);
+const ManagersPage = () => {
+  const [managers, setManagers] = useState<Managerdetails[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [editManager, setEditManager] = useState<Managerdetails | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+
+  const fetchManagers = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.get('/managers');
+      setManagers(response.data);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch managers.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchManagers = async () => {
-      try {
-        const res = await api.get("/managers");
-        setManagers(res.data);
-      } catch {
-        setError("Failed to load managers.");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchManagers();
   }, []);
 
-  const grouped = managers.reduce((acc, m) => {
-    const nameKey = capitalize(m.fullName);
-    if (!acc[nameKey]) acc[nameKey] = [];
-    acc[nameKey].push({ ...m, fullName: nameKey, companyName: capitalize(m.companyName) });
-    return acc;
-  }, {} as Record<string, Manager[]>);
+  const handleCreateManager = (newManager: Managerdetails) => {
+    setManagers((prevManagers) => [...prevManagers, newManager]);
+    setMessage('Manager created!');
+    setOpen(false);
+    fetchManagers();
+  };
 
-  if (loading) return <p className="text-center text-gray-500 mt-10">Loading managers...</p>;
-  if (error) return <p className="text-center text-red-500 mt-10">{error}</p>;
+  const handleUpdateManager = (updatedManager: Managerdetails) => {
+    setManagers((prevManagers) =>
+      prevManagers.map((m) => (m.id === updatedManager.id ? updatedManager : m))
+    );
+    setMessage('Manager updated!');
+    setEditManager(null);
+    fetchManagers();
+  };
+
+  const handleDeleteManager = (managerId: string) => {
+    setManagers((prevManagers) => prevManagers.filter((m) => m.id !== managerId));
+    setMessage('Manager deleted!');
+    fetchManagers();
+  };
+
+  const handleEdit = (manager: Managerdetails) => {
+    setEditManager(manager);
+  };
+
+  const handleCancelEdit = () => {
+    setEditManager(null);
+  };
 
   return (
-    <div className="relative min-h-screen px-6 py-10 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 text-white">
-      <h1 className="text-4xl font-bold text-center mb-12">Managers</h1>
-      <BackButton />
-      <div className="space-y-12 max-w-5xl mx-auto">
-        {Object.entries(grouped).map(([name, group]) => (
-          <div key={name}>
-            <h2 className="text-2xl font-semibold mb-4 text-indigo-300">{name}</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {group.map((manager) => (
-                <motion.div
-                  key={manager.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ type: "spring", stiffness: 100 }}
-                  className="rounded-xl p-5 backdrop-blur bg-white/10 border border-white/20 shadow-md hover:shadow-2xl hover:-translate-y-1 transition-transform"
-                >
-                  <p className="text-md flex items-center gap-2">
-                    <FaBuilding className="text-indigo-300" />
-                    <span>{manager.companyName === "None" ? "No Company" : manager.companyName}</span>
-                  </p>
-                  <p className="text-sm text-gray-200 mt-2">
-                    <strong>Description:</strong> {manager.companyDescription || "No description."}
-                  </p>
-                  <p className="text-sm text-gray-300 mt-2 flex items-center gap-2">
-                    <FaCalendarAlt />
-                    Joined {getDaysAgo(manager.createdAt)}
-                  </p>
-                  <button
-                    onClick={() => router.push(`./identities`)}
-                    className="mt-4 inline-block text-sm bg-indigo-600 hover:bg-indigo-700 text-white py-1.5 px-3 rounded-lg transition"
-                  >
-                    View Identities
-                  </button>
-                </motion.div>
-              ))}
+    <div className="p-6">
+      <h1 className="text-3xl font-bold mb-8 text-center ">
+        Managers
+      </h1>
+
+      {message && (
+        <div className="mb-4">
+          <div>
+            <SuccessMessage message={message} />
+          </div>
+        </div>
+      )}
+
+      <div className="flex justify-end mb-4">
+        <div  onClick={() => setOpen(true)}>
+          <button >➕ Add Manager</button>
+        </div>
+        {open && (
+          <div>
+             <div>
+              <div>Create New Manager</div>
+              <div>
+                Fill out the form below to create a new manager.
+              </div>
+            </div>
+            <CreateManager
+              onManagerCreated={handleCreateManager}
+              setLoading={setLoading}
+              setMessage={setMessage}
+            />
+            <div >
+              <button  onClick={() => setOpen(false)}>
+                Cancel
+              </button>
             </div>
           </div>
-        ))}
+        )}
       </div>
+
+      {loading ? (
+        <p className="text-center  mt-10">Loading managers...</p>
+      ) : error ? (
+        <div>
+          <div>
+             <ErrorMessage message={error} />
+          </div>
+        </div>
+      ) : (
+        <>
+          <AnimatePresence>
+            {editManager && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.2 }}
+              >
+                <EditManager
+                  manager={editManager}
+                  onManagerUpdated={handleUpdateManager}
+                  onCancel={handleCancelEdit}
+                  setLoading={setLoading}
+                  setMessage={setMessage}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {!editManager && (
+            <DisplayManagers
+              managers={managers}
+              onEdit={handleEdit}
+              onDelete={handleDeleteManager}
+              setLoading={setLoading}
+              setMessage={setMessage}
+            />
+          )}
+        </>
+      )}
     </div>
   );
-}
+};
+
+export default ManagersPage;
+

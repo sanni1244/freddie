@@ -1,114 +1,146 @@
-"use client";
+'use client';
+import { useState, useEffect } from 'react';
+import api from '@/lib/api';
+import SuccessMessage from '../../components/success';
+import ErrorMessage from '../../components/error';
+import Back from '../../components/backbutton';
+import DisplayManagerIdentities from '../../components/display/displayidentites';
+import CreateIdentity from '../../components/create/createidentities';
+import EditIdentity from '../../components/edit/editidentities';
+import { Identity, Manager } from '@/types';
 
-import { useEffect, useState } from "react";
-import api from "@/lib/api";
-import { motion } from "framer-motion";
-import { FaUserEdit, FaTrashAlt } from "react-icons/fa";
-import { MdVerifiedUser, MdBadge, MdCalendarToday } from "react-icons/md";
-import { useSearchParams } from "next/navigation";
-
-type Identity = {
-  id: string;
-  identity?: string;
-  identityType?: string;
-  verificationStatus?: string;
-  createdAt?: string;
-};
-
-const getDaysAgo = (date?: string) => {
-  if (!date) return "N/A";
-  const days = Math.floor((Date.now() - new Date(date).getTime()) / (1000 * 3600 * 24));
-  return isNaN(days) ? "N/A" : `${days} days ago`;
-};
-
-export default function IdentitiesPage() {
+const IdentityPage = () => {
+  const [managers, setManagers] = useState<Manager[]>([]);
+  const [selectedManagerId, setSelectedManagerId] = useState<string | null>(null);
+  const [selectedManagerName, setSelectedManagerName] = useState<string | null>(null);
   const [identities, setIdentities] = useState<Identity[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const searchParams = useSearchParams();
-  const managerId = searchParams.get("managerId");
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedIdentity, setEditedIdentity] = useState<Identity | null>(null);
+
+  useEffect(() => {
+    const fetchManagers = async () => {
+      try {
+        const response = await api.get('/managers');
+        setManagers(response.data);
+      } catch (error) {
+        setErrorMessage('Error fetching managers.');
+        console.error('Error fetching managers:', error);
+      }
+    };
+
+    fetchManagers();
+  }, []);
 
   useEffect(() => {
     const fetchIdentities = async () => {
-      if (managerId) {
+      if (selectedManagerId) {
         try {
-          const res = await api.get(`/managers/${managerId}/identities?managerId=${managerId}`);
-          setIdentities(res.data.identities);
-          console.log(res.data.identities);
-        } catch (err) {
-          setError("Failed to load identities.");
-        } finally {
-          setLoading(false);
+          const response = await api.get(`/managers/${selectedManagerId}/identities?managerId=${selectedManagerId}`);
+          setIdentities(response.data.identities);
+        } catch (error) {
+          setErrorMessage('Error fetching identities.');
+          console.error('Error fetching identities:', error);
         }
       } else {
-        setError("Manager ID not provided.");
-        setLoading(false);
+        setIdentities([]);
       }
     };
 
     fetchIdentities();
-  }, [managerId]);
+  }, [selectedManagerId]);
 
-  if (loading) return <p className="text-center text-gray-400 mt-10">Loading identities...</p>;
-  if (error) return <p className="text-center text-red-500 mt-10">{error}</p>;
+  const handleManagerChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = event.target.value;
+    setSelectedManagerId(selectedId);
+    const selectedManager = managers.find((manager) => manager.id === selectedId);
+    setSelectedManagerName(selectedManager ? selectedManager.fullName : null);
+  };
+  
+
+  const handleIdentityUpdated = (updatedIdentities: Identity[]) => {
+    setIdentities(updatedIdentities);
+  };
+
+  const handleIdentityCreated = (newIdentity: Identity) => {
+    setIdentities((prevIdentities) => [...prevIdentities, newIdentity]);
+  };
+
+  const handleEdit = (identity: Identity) => {
+    setIsEditing(true);
+    setEditedIdentity(identity);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditedIdentity(null);
+  };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.8 }}
-      className="min-h-screen px-6 py-12 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 text-white"
-    >
-      <h1 className="text-5xl font-extrabold text-center text-indigo-300 mb-16 drop-shadow-lg">
-        Manager Identities
-      </h1>
+    <div className="relative">
+      <Back />
 
-      <div className="space-y-10 max-w-4xl mx-auto">
-        {identities.map((identity) => (
-          <motion.div
-            key={identity.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: "spring", stiffness: 100, delay: 0.1 }}
-            className="flex justify-between items-center p-6 bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 shadow-lg hover:shadow-2xl transition-all duration-300"
+      <div className="container mx-auto p-8 bg-gray-50 rounded-lg shadow-lg">
+        {successMessage && <SuccessMessage message={successMessage} />}
+        {errorMessage && <ErrorMessage message={errorMessage} />}
+
+        <h1 className="text-2xl font-semibold text-gray-800 mb-4">Select a Manager</h1>
+
+        {managers.length === 0 ? (
+          <p className="text-gray-500">Loading managers...</p>
+        ) : (
+          <select
+            className="border border-gray-300 p-3 rounded-lg w-full mb-4 bg-white"
+            onChange={handleManagerChange}
+            value={selectedManagerId || ''}
           >
-            <div className="space-y-2">
-              <p className="text-lg font-semibold flex items-center gap-2 text-indigo-400">
-                <MdBadge className="text-xl" />
-                {identity.identityType || "Unknown Type"}
-              </p>
-              <p className="text-sm text-gray-300 flex items-center gap-2">
-                <MdVerifiedUser />
-                {identity.identity || "No email"}
-              </p>
-              <p className="text-sm text-gray-300 flex items-center gap-2">
-                <MdVerifiedUser />
-                {identity.verificationStatus || "not initiated"}
-              </p>
-              <p className="text-sm text-gray-400 flex items-center gap-2 mt-2">
-                <MdCalendarToday />
-                Created {getDaysAgo(identity.createdAt)}
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                className="p-2 bg-indigo-600 text-white rounded-full shadow-md hover:bg-indigo-700"
-              >
-                <FaUserEdit className="text-lg" />
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                className="p-2 bg-red-600 text-white rounded-full shadow-md hover:bg-red-700"
-              >
-                <FaTrashAlt className="text-lg" />
-              </motion.button>
-            </div>
-          </motion.div>
-        ))}
+            <option value="">Select a manager</option>
+            {managers.map((manager) => (
+              <option key={manager.id} value={manager.id}>
+                {manager.fullName}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {selectedManagerName && (
+          <p className="text-xl font-medium text-gray-700">Selected Manager: {selectedManagerName}</p>
+        )}
+
+        {selectedManagerId && (
+          <DisplayManagerIdentities
+            managerId={selectedManagerId}
+            identities={identities}
+            onIdentityDeleted={(id) => setIdentities((prev) => prev.filter((i) => i.id !== id))}
+            onEdit={handleEdit}
+            setSuccessMessage={setSuccessMessage}
+            setErrorMessage={setErrorMessage}
+          />
+        )}
+
+        {!isEditing && selectedManagerId && (
+          <CreateIdentity
+            managerId={selectedManagerId}
+            onIdentityCreated={handleIdentityCreated}
+            setSuccessMessage={setSuccessMessage}
+            setErrorMessage={setErrorMessage}
+          />
+        )}
+
+        {isEditing && editedIdentity && selectedManagerId && (
+          <EditIdentity
+            managerId={selectedManagerId}
+            identity={editedIdentity}
+            onIdentityUpdated={handleIdentityUpdated}
+            onCancel={handleCancelEdit}
+            setSuccessMessage={setSuccessMessage}
+            setErrorMessage={setErrorMessage}
+          />
+        )}
       </div>
-    </motion.div>
+    </div>
   );
-}
+};
+
+export default IdentityPage;
