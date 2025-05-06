@@ -1,4 +1,3 @@
-// components/DeleteIdentity.tsx
 interface DeleteIdentityProps {
     identityId: string;
     onDelete: (id: string) => void;

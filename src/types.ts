@@ -161,5 +161,5 @@ export interface FormField {
 export interface FormGroupTemplate {
   id?: string;
   title: string;
-  fields: FormField[]; // Ensure this is consistent
+  fields: FormField[];
 }

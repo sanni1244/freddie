@@ -1,5 +1,4 @@
 'use client';
-
 import api from '@/lib/api';
 
 type DeleteProp = {

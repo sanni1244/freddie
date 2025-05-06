@@ -1,4 +1,3 @@
-// pages/managers/index.tsx
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Managerdetails } from '@/types';

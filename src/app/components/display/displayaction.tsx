@@ -23,7 +23,7 @@ const DisplayForms: React.FC<DisplayFormsProps> = ({
     const [showConfirmDelete, setShowConfirmDelete] = useState<string | null>(null);
 
     const handleDelete = async (formId: string) => {
-        if (!showConfirmDelete) return; // Important: Check if confirmation is active
+        if (!showConfirmDelete) return; // Check if confirmation is active
         try {
             await api.delete(`/managers/${managerId}/forms/${formId}`);
             onFormDeleted(formId);

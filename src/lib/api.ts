@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://api-freddie.ai-wk.com",
+  baseURL: process.env.BASE_URL, 
   headers: {
     "Content-Type": "application/json",
   },

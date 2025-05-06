@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { FormTemplate } from '@/types';
-import api from '@/lib/api'; // Import your custom API client
+import api from '@/lib/api';
 
 interface CreateTemplateProps {
   onTemplateCreated: (newTemplate: FormTemplate) => void;
@@ -49,10 +49,10 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
 
     setLoading(true);
     try {
-      const response = await api.post('/form-templates', payload); // Use your api client
+      const response = await api.post('/form-templates', payload); 
       const data: FormTemplate = response.data;
       onTemplateCreated(data);
-      setNewTemplate({  //reset form
+      setNewTemplate({  
         title: '',
         formType: '',
         groups: [],
@@ -77,10 +77,8 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
         setNewTemplate(prevTemplate => {
             const newGroups = prevTemplate.groups ? [...prevTemplate.groups] : [];
             const groupToUpdate = newGroups[index] ? { ...newGroups[index] } : { fields: [] };  // Ensure fields exist
-
-            groupToUpdate[fieldName] = value;
-
-            newGroups[index] = groupToUpdate;
+            // groupToUpdate[fieldName] = value;
+            // newGroups[index] = groupToUpdate;
             return { ...prevTemplate, groups: newGroups };
         });
     };
@@ -92,11 +90,10 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
         const newFields = groupToUpdate.fields ? [...groupToUpdate.fields] : [];
         const fieldToUpdate = newFields[fieldIndex] ? { ...newFields[fieldIndex] } : {};
 
-        fieldToUpdate[fieldName] = value;
-        newFields[fieldIndex] = fieldToUpdate;
-        groupToUpdate.fields = newFields;
-        newGroups[groupIndex] = groupToUpdate;
-
+        // fieldToUpdate[fieldName] = value;
+        // newFields[fieldIndex] = fieldToUpdate;
+        // groupToUpdate.fields = newFields;
+        // newGroups[groupIndex] = groupToUpdate;
         return { ...prevTemplate, groups: newGroups };
       });
     };
@@ -130,7 +127,7 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
                 sortOrder: 0
             });
             groupToUpdate.fields = newFields;
-            newGroups[groupIndex] = groupToUpdate;
+            // newGroups[groupIndex] = groupToUpdate;
 
             return { ...prevTemplate, groups: newGroups };
         });
@@ -142,7 +139,7 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
             const groupToUpdate = newGroups[groupIndex] ? { ...newGroups[groupIndex] } : { fields: [] };
             const newFields = groupToUpdate.fields ? groupToUpdate.fields.filter((_, i) => i !== fieldIndex) : [];
             groupToUpdate.fields = newFields;
-            newGroups[groupIndex] = groupToUpdate;
+            // newGroups[groupIndex] = groupToUpdate;
             return { ...prevTemplate, groups: newGroups };
         });
     };
@@ -150,7 +147,6 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
   return (
     <div className="mt-12">
       <h2 className="text-2xl font-semibold text-blue-900 mb-6">➕ Create New Form Template</h2>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
         <input
           className="border border-gray-300 p-3 rounded-lg shadow-sm"
@@ -278,7 +274,7 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
           className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg shadow-md"
           onClick={handleCreateTemplate}
         >
-          ✅ Create Template
+           Create Template
         </button>
       </div>
     </div>

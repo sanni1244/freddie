@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { FormTemplate } from '@/types';
-import api from '@/lib/api'; // Import your custom API client
+import api from '@/lib/api'; 
 
 interface EditTemplateProps {
   template: FormTemplate;
@@ -49,16 +49,13 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
             ...editedTemplate,
             title: editedTemplate.title?.trim(),
             formType: editedTemplate.formType?.trim(),
-            //  Make sure groups and fields are handled correctly.
-            groups: editedTemplate.groups, //  Keep original or process if edited
+            groups: editedTemplate.groups, 
             fields: editedTemplate.fields,
         };
 
         setLoading(true);
         try {
-            // Use api.patch instead of fetch
             const response = await api.patch(`/form-templates/${editedTemplate.id}?managerId=${selectedManagerId}`, payload);
-
             const data: FormTemplate = response.data;
             onTemplateUpdated(data);
             setMessage('Form template updated successfully.');
@@ -76,33 +73,23 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
     setEditedTemplate((prev) => ({ ...prev, [name]: value }));
   };
 
-    // Function to handle changes in groups.  This is more complex, and you'll need to adapt it
-    // based on how you want users to edit groups (add, remove, modify fields within groups, etc.).
     const handleGroupChange = (index: number, fieldName: string, value: any) => {
         setEditedTemplate(prevTemplate => {
             if (!prevTemplate.groups) return { ...prevTemplate };
 
             const newGroups = [...prevTemplate.groups];
             const groupToUpdate = { ...newGroups[index] };
-
-            groupToUpdate[fieldName] = value; // simple updates to title or sortOrder
-
           newGroups[index] = groupToUpdate;
             return { ...prevTemplate, groups: newGroups };
         });
     };
 
-    // Function to handle changes in fields.  Like handleGroupChange, this needs careful
-    // adaptation depending on your UI for editing fields.
       const handleFieldChange = (index: number, fieldName: string, value: any) => {
         setEditedTemplate(prevTemplate => {
             if (!prevTemplate.fields) return { ...prevTemplate };
 
             const newFields = [...prevTemplate.fields];
             const fieldToUpdate = { ...newFields[index] };
-
-            fieldToUpdate[fieldName] = value;
-
             newFields[index] = fieldToUpdate;
             return { ...prevTemplate, fields: newFields };
         });
@@ -127,7 +114,7 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
           onChange={handleChange}
         />
 
-        {/* Display and allow editing of groups */}
+        {/* Editing of groups */}
         <div>
             <label className="block text-sm font-semibold text-gray-700">Groups</label>
              {editedTemplate.groups?.map((group, groupIndex) => (
@@ -197,7 +184,7 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
                 </div>
             ))}
         </div>
-        {/* Display and allow editing of root fields (outside groups) */}
+        {/* Allow editing of root fields (outside groups) */}
          <div>
             <label className="block text-sm font-semibold text-gray-700">Fields (Outside Groups)</label>
              {editedTemplate.fields?.map((field, fieldIndex) => (

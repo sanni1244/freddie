@@ -5,10 +5,10 @@ import api from '@/lib/api';
 import SuccessMessage from '../../components/success';
 import ErrorMessage from '../../components/error';
 import Back from '../../components/backbutton';
-import DisplayTemplates from '../../components/display/displaytemplate'; // We'll create this
-import CreateTemplate from '../../components/create/createtemplate'; // We'll create this
-import EditTemplate from '../../components/edit/edittemplate'; // We'll create this
-import { Manager, FormTemplate } from '@/types'; // Assuming these interfaces are in your types.tsx
+import DisplayTemplates from '../../components/display/displaytemplate';
+import CreateTemplate from '../../components/create/createtemplate';
+import EditTemplate from '../../components/edit/edittemplate';
+import { Manager, FormTemplate } from '@/types'; 
 
 const FormTemplatesPage = () => {
   const [managers, setManagers] = useState<Manager[]>([]);
@@ -106,7 +106,7 @@ const FormTemplatesPage = () => {
       {loading && <p className="text-blue-600 font-medium animate-pulse">Loading...</p>}
 
       {selectedManagerId && (
-        <DisplayTemplates // We need to create this component
+        <DisplayTemplates 
           templates={templates}
           onEdit={handleEdit}
           onDelete={handleTemplateDeleted}
@@ -117,7 +117,7 @@ const FormTemplatesPage = () => {
       )}
 
       {selectedManagerId && !isEditing && (
-        <CreateTemplate // We need to create this component
+        <CreateTemplate 
           onTemplateCreated={handleTemplateCreated}
           setLoading={setLoading}
           setMessage={setMessage}
@@ -126,7 +126,7 @@ const FormTemplatesPage = () => {
       )}
 
       {isEditing && editedTemplate && selectedManagerId && (
-        <EditTemplate // We need to create this component
+        <EditTemplate
           template={editedTemplate}
           onTemplateUpdated={handleTemplateUpdated}
           onCancel={handleCancelEdit}

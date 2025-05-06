@@ -78,7 +78,7 @@ const CreateManager: React.FC<CreateManagerProps> = ({ onManagerCreated, setLoad
 
   return (
     <div className="mt-12">
-      <h2 className="text-2xl font-semibold text-blue-900 mb-6">➕ Create New Manager</h2>
+      <h2 className="text-2xl font-semibold text-blue-900 mb-6"> Create New Manager</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <input
@@ -121,7 +121,7 @@ const CreateManager: React.FC<CreateManagerProps> = ({ onManagerCreated, setLoad
           className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg shadow-md"
           onClick={handleCreateManager}
         >
-          ✅ Create Manager
+           Create Manager
         </button>
       </div>
     </div>

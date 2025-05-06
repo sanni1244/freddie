@@ -32,7 +32,7 @@ const EditIdentity: React.FC<EditIdentityProps> = ({
         `/managers/${managerId}/identities/${editedIdentity.id}`,
         editedIdentity
       );
-      onIdentityUpdated([response.data]); // Assuming the API returns the updated identity
+      onIdentityUpdated([response.data]); 
       setSuccessMessage('Identity updated successfully.');
       onCancel();
     } catch (error) {

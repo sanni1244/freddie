@@ -8,7 +8,7 @@ import Back from '../../components/backbutton';
 import DisplayJobs from '../../components/display/displayjobs';
 import CreateJob from '../../components/create/createjobs';
 import EditJob from '../../components/edit/editjobs';
-import { Manager, Job } from '@/types'; // Assuming these interfaces are in your types.tsx
+import { Manager, Job } from '@/types';
 
 const JobsPage = () => {
   const [managers, setManagers] = useState<Manager[]>([]);

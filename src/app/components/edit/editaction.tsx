@@ -78,10 +78,8 @@ const EditForm: React.FC<EditFormProps> = ({
                     group.fields = fields;
                     groups[groupIndex] = group;
                     return { ...prev, groups };
-                }
-            });
-        },
-        []
+                }});
+            },[]
     );
 
     const addGroup = useCallback(() => {

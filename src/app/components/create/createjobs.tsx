@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { Job } from '@/types';
-import api from '@/lib/api'; // Import your custom API client
+import api from '@/lib/api';
 
 interface CreateJobProps {
   onJobCreated: (newJob: Job) => void;
@@ -15,7 +15,7 @@ const CreateJob: React.FC<CreateJobProps> = ({ onJobCreated, setLoading, setMess
     title: '',
     description: '',
     requirements: [],
-    roles: [], // Changed to array
+    roles: [], 
     country: '',
     state: '',
     city: '',
@@ -53,21 +53,21 @@ const CreateJob: React.FC<CreateJobProps> = ({ onJobCreated, setLoading, setMess
       state: newJob.state?.trim(),
       city: newJob.city?.trim(),
       workMode: newJob.workMode?.trim(),
-      requirements: newJob.requirements, // Ensure it's an array
-      roles: newJob.roles, // Ensure it's an array
+      requirements: newJob.requirements, 
+      roles: newJob.roles, 
       managerId: selectedManagerId,
     };
 
     setLoading(true);
     try {
-      const response = await api.post('/jobs', payload); // Use your api client
+      const response = await api.post('/jobs', payload);
       const data: Job = response.data;
       onJobCreated(data);
       setNewJob({
         title: '',
         description: '',
         requirements: [],
-        roles: [], // Reset to empty array
+        roles: [], 
         country: '',
         state: '',
         city: '',
@@ -86,7 +86,7 @@ const CreateJob: React.FC<CreateJobProps> = ({ onJobCreated, setLoading, setMess
 
   return (
     <div className="mt-12">
-      <h2 className="text-2xl font-semibold text-blue-900 mb-6">➕ Create New Job</h2>
+      <h2 className="text-2xl font-semibold text-blue-900 mb-6"> Create New Job</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <input
           className="border border-gray-300 p-3 rounded-lg shadow-sm"
@@ -162,7 +162,7 @@ const CreateJob: React.FC<CreateJobProps> = ({ onJobCreated, setLoading, setMess
           className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg shadow-md"
           onClick={handleCreateJob}
         >
-          ✅ Create Job
+           Create Job
         </button>
       </div>
     </div>

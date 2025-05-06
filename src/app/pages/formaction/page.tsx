@@ -7,9 +7,8 @@ interface DisplayFormTemplatesProps {
     onEdit: (formTemplate: FormTemplate) => void;
     onDelete: (formTemplateId: string) => void;
     setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-    // setMessage: React.Dispatch<React.SetStateAction<string | null>>;
-    jobId: string; // Add jobId prop to fetch forms specific to the job
-    managerId: string; // Add managerId prop to fetch forms specific to the manager
+    jobId: string;
+    managerId: string; 
 }
 
 const DisplayFormTemplates: React.FC<DisplayFormTemplatesProps> = ({ onEdit, onDelete, setLoading, jobId, managerId }) => {
@@ -18,7 +17,7 @@ const DisplayFormTemplates: React.FC<DisplayFormTemplatesProps> = ({ onEdit, onD
     useEffect(() => {
         if (!jobId || !managerId) {
             // setMessage('Job ID or Manager ID is missing.');
-            return; // Prevent API call if IDs are missing
+            return; 
         }
 
         const fetchFormTemplates = async () => {
