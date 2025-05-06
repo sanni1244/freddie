@@ -78,7 +78,7 @@ Install & Run
 bash
 Copy
 Edit
-git clone https://github.com/sanni1244/freddie-ui.git  
+git clone https://github.com/sanni1244/freddie-ui.git
 cd freddie-ui  
 npm install  
 npm run dev
