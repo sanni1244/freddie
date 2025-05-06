@@ -6,7 +6,7 @@ import CreateTemplate from '../../components/create/createtemplate';
 import EditTemplate from '../../components/edit/edittemplate';
 import { Manager, FormTemplate } from '@/types'; 
 
-const FormTemplatesPage = () => {
+const FormTemplatesPage = () => { 
   const [managers, setManagers] = useState<Manager[]>([]);
   const [selectedManagerId, setSelectedManagerId] = useState<string | null>(null);
   const [templates, setTemplates] = useState<FormTemplate[]>([]);
