@@ -44,3 +44,122 @@ export type Manager = {
     verificationStatus: string;
     createdAt: string;
   };
+
+
+
+
+
+
+export interface FormField {
+  label: string;
+  type: string;
+  options?: string;
+  required: boolean;
+  applicantFieldMapping?: string;
+  sortOrder: number;
+}
+
+export interface FormGroup {
+  title: string;
+  fields: FormField[];
+  sortOrder: number;
+}
+
+export interface FormTemplate {
+  id: string;
+  title: string;
+  managerId: string;
+  formType: string;
+  groups: FormGroup[];
+  fields: FormField[];
+}
+
+export interface Group {
+  id?: string;
+  title: string;
+  sortOrder: number;
+  fields?: Field[];
+}
+
+export interface Field {
+  id?: string;
+  label: string;
+  type: string;
+  options?: string; // e.g., for select fields
+  required: boolean;
+  applicantFieldMapping?: string;
+  sortOrder: number;
+}
+
+
+
+
+
+
+
+export interface Field {
+  label: string;
+  type: string;
+  options?: string;
+  required: boolean;
+  applicantFieldMapping?: string;
+  sortOrder: number;
+}
+
+export interface Group {
+  title: string;
+  sortOrder: number;
+}
+
+export interface Form {
+  id: string;
+  title: string;
+  // managerId: string;
+  formType: string;
+  groups: FormGroup[];
+  fields: FormField[];
+}
+
+export interface FormField {
+  label: string;
+  type: string;
+  options?: string;
+  required: boolean;
+  applicantFieldMapping?: string;
+  sortOrder: number;
+}
+
+export interface FormField {
+  id?: string; 
+  label: string;
+  type: string;
+  options?: string;
+  required: boolean;
+  applicantFieldMapping?: string;
+  sortOrder: number;
+  placeholder?: string;
+  helpText?: string;
+  defaultValue?: string;
+  validationPattern?: string;
+}
+
+
+export interface FormField {
+  id?: string;
+  label: string;
+  type: string;
+  options?: string;
+  required: boolean;
+  applicantFieldMapping?: string;
+  sortOrder: number;
+  placeholder?: string;
+  helpText?: string;
+  defaultValue?: string;
+  validationPattern?: string;
+}
+
+export interface FormGroupTemplate {
+  id?: string;
+  title: string;
+  fields: FormField[]; // Ensure this is consistent
+}

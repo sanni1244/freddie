@@ -5,10 +5,10 @@ import { Briefcase, Users, FileText, ClipboardList, Send, Globe, Activity } from
 
 const pages = [
   { name: "Managers", path: "./pages/managers", icon: Users },
-  { name: "Identities", path: "./pages/identities/editmanager", icon: FileText },
+  { name: "Identities", path: "./pages/identities", icon: FileText },
   { name: "Jobs", path: "./pages/jobs", icon: Briefcase },
   { name: "Form Templates", path: "./pages/template", icon: ClipboardList },
-  { name: "Form Actions", path: "/form-actions", icon: Send },
+  { name: "Form Actions", path: "./pages/formaction", icon: Send },
   { name: "Form Responses", path: "/form-responses", icon: Activity },
   { name: "Public Form Links", path: "/public-links", icon: Globe },
 ];
