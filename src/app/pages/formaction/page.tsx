@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { FormTemplate } from '@/types';
 import api from '@/lib/api';
 
-interface DisplayFormTemplatesProps {
+interface Form {
   onEdit: (formTemplate: FormTemplate) => void;
   onDelete: (formTemplateId: string) => void;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -11,7 +11,7 @@ interface DisplayFormTemplatesProps {
   managerId: string;
 }
 
-const DisplayFormTemplates: React.FC<DisplayFormTemplatesProps> = ({ onEdit, onDelete, setLoading, jobId, managerId }) => {
+const DisplayFormTemplates: React.FC<Form> = ({ onEdit, onDelete, setLoading, jobId, managerId }) => {
   const [formTemplates, setFormTemplates] = useState<FormTemplate[]>([]);
 
   useEffect(() => {
