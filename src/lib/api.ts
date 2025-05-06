@@ -1,7 +1,8 @@
 import axios from "axios";
 
+// Create an Axios instance pointing to your Next.js proxy
 const api = axios.create({
-  baseURL: "https://api-freddie.ai-wk.com",
+  baseURL: "/api/proxy", // Points to your proxy route
   headers: {
     "Content-Type": "application/json",
   },
