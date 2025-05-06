@@ -59,9 +59,8 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
         fields: [],
       });
       setMessage('Form Template created successfully.');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating form template:', error);
-      setMessage(error.response?.data?.message || error.message || 'Failed to create form template.');
     } finally {
       setLoading(false);
     }
@@ -73,27 +72,13 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
         setNewTemplate(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleGroupChange = (index: number, fieldName: string, value: any) => {
-        setNewTemplate(prevTemplate => {
-            const newGroups = prevTemplate.groups ? [...prevTemplate.groups] : [];
-            const groupToUpdate = newGroups[index] ? { ...newGroups[index] } : { fields: [] };  // Ensure fields exist
-            // groupToUpdate[fieldName] = value;
-            // newGroups[index] = groupToUpdate;
-            return { ...prevTemplate, groups: newGroups };
-        });
-    };
 
-    const handleFieldChange = (groupIndex: number, fieldIndex: number, fieldName: string, value: any) => {
+    const handleFieldChange = (groupIndex: number, fieldIndex: number) => {
       setNewTemplate((prevTemplate) => {
         const newGroups = prevTemplate.groups ? [...prevTemplate.groups] : [];
         const groupToUpdate = newGroups[groupIndex] ? { ...newGroups[groupIndex] } : { fields: [] };
         const newFields = groupToUpdate.fields ? [...groupToUpdate.fields] : [];
         const fieldToUpdate = newFields[fieldIndex] ? { ...newFields[fieldIndex] } : {};
-
-        // fieldToUpdate[fieldName] = value;
-        // newFields[fieldIndex] = fieldToUpdate;
-        // groupToUpdate.fields = newFields;
-        // newGroups[groupIndex] = groupToUpdate;
         return { ...prevTemplate, groups: newGroups };
       });
     };
@@ -127,8 +112,6 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
                 sortOrder: 0
             });
             groupToUpdate.fields = newFields;
-            // newGroups[groupIndex] = groupToUpdate;
-
             return { ...prevTemplate, groups: newGroups };
         });
     };
@@ -139,14 +122,13 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
             const groupToUpdate = newGroups[groupIndex] ? { ...newGroups[groupIndex] } : { fields: [] };
             const newFields = groupToUpdate.fields ? groupToUpdate.fields.filter((_, i) => i !== fieldIndex) : [];
             groupToUpdate.fields = newFields;
-            // newGroups[groupIndex] = groupToUpdate;
             return { ...prevTemplate, groups: newGroups };
         });
     };
 
   return (
     <div className="mt-12">
-      <h2 className="text-2xl font-semibold text-blue-900 mb-6">➕ Create New Form Template</h2>
+      <h2 className="text-2xl font-semibold text-blue-900 mb-6"> Create New Form Template</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
         <input
           className="border border-gray-300 p-3 rounded-lg shadow-sm"
@@ -174,7 +156,6 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
                           className="border border-gray-300 p-2 rounded-lg shadow-sm w-3/4"
                           placeholder={`Group ${groupIndex + 1} Title`}
                           value={group.title || ''}
-                          onChange={(e) => handleGroupChange(groupIndex, 'title', e.target.value)}
                         />
                          <button
                             type="button"
@@ -189,7 +170,6 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
                       placeholder={`Group ${groupIndex + 1} Sort Order`}
                       type="number"
                       value={group.sortOrder || 0}
-                      onChange={(e) => handleGroupChange(groupIndex, 'sortOrder', parseInt(e.target.value, 10))}
                     />
 
                     {/* Fields within Group */}
@@ -202,39 +182,33 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
                                       className="border border-gray-300 p-2 rounded-lg shadow-sm"
                                       placeholder={`Field ${fieldIndex + 1} Label`}
                                       value={field.label || ''}
-                                      onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'label', e.target.value)}
                                     />
                                     <input
                                       className="border border-gray-300 p-2 rounded-lg shadow-sm"
                                       placeholder={`Field ${fieldIndex + 1} Type`}
                                       value={field.type || 'text'}
-                                      onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'type', e.target.value)}
                                     />
                                     <input
                                       className="border border-gray-300 p-2 rounded-lg shadow-sm"
                                       placeholder={`Field ${fieldIndex + 1} Options`}
                                       value={field.options || ''}
-                                      onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'options', e.target.value)}
                                     />
                                     <input
                                       className="border border-gray-300 p-2 rounded-lg shadow-sm"
                                       placeholder={`Field ${fieldIndex + 1} Applicant Field Mapping`}
                                       value={field.applicantFieldMapping || ''}
-                                      onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'applicantFieldMapping', e.target.value)}
                                     />
                                     <input
                                       className="border border-gray-300 p-2 rounded-lg shadow-sm"
                                       placeholder={`Field ${fieldIndex + 1} Sort Order`}
                                       type="number"
                                       value={field.sortOrder || 0}
-                                      onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'sortOrder', parseInt(e.target.value, 10))}
                                     />
                                     <label className="inline-flex items-center">
                                         <input
                                             type="checkbox"
                                             className="form-checkbox h-5 w-5 text-blue-600 rounded"
                                             checked={field.required || false}
-                                            onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'required', e.target.checked)}
                                         />
                                         <span className="ml-2 text-gray-700 text-sm">Required</span>
                                     </label>

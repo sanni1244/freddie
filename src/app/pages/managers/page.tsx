@@ -23,8 +23,8 @@ const ManagersPage = () => {
     try {
       const response = await api.get('/managers');
       setManagers(response.data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch managers.');
+    } catch (err) {
+      setError('Failed to fetch managers.');
     } finally {
       setLoading(false);
     }

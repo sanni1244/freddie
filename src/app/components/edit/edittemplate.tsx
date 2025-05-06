@@ -60,9 +60,8 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
             onTemplateUpdated(data);
             setMessage('Form template updated successfully.');
             onCancel();
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error updating form template:', error);
-            setMessage(error.response?.data?.message || 'Failed to update form template.');
         } finally {
             setLoading(false);
         }
@@ -73,7 +72,7 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
     setEditedTemplate((prev) => ({ ...prev, [name]: value }));
   };
 
-    const handleGroupChange = (index: number, fieldName: string, value: any) => {
+    const handleGroupChange = (index: number, fieldName: string, value: null) => {
         setEditedTemplate(prevTemplate => {
             if (!prevTemplate.groups) return { ...prevTemplate };
 
@@ -84,7 +83,7 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
         });
     };
 
-      const handleFieldChange = (index: number, fieldName: string, value: any) => {
+      const handleFieldChange = (index: number, fieldName: string, value: null) => {
         setEditedTemplate(prevTemplate => {
             if (!prevTemplate.fields) return { ...prevTemplate };
 
@@ -123,14 +122,12 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
                       className="border border-gray-300 p-2 rounded-lg shadow-sm w-full"
                       placeholder={`Group ${groupIndex + 1} Title`}
                       value={group.title || ''}
-                      onChange={(e) => handleGroupChange(groupIndex, 'title', e.target.value)}
                     />
                     <input
                       className="border border-gray-300 p-2 rounded-lg shadow-sm w-full mt-2"
                       placeholder={`Group ${groupIndex + 1} Sort Order`}
                       type="number"
                       value={group.sortOrder || 0}
-                      onChange={(e) => handleGroupChange(groupIndex, 'sortOrder', parseInt(e.target.value, 10))}
                     />
 
                     {/* Display fields within each group */}
@@ -142,39 +139,33 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
                                   className="border border-gray-300 p-1 rounded-lg shadow-sm w-full"
                                   placeholder={`Field ${fieldIndex + 1} Label`}
                                   value={field.label || ''}
-                                  onChange={(e) => handleFieldChange(fieldIndex, 'label', e.target.value)}
                                 />
                                  <input
                                   className="border border-gray-300 p-1 rounded-lg shadow-sm w-full mt-1"
                                   placeholder={`Field ${fieldIndex + 1} Type`}
                                   value={field.type || ''}
-                                  onChange={(e) => handleFieldChange(fieldIndex, 'type', e.target.value)}
                                 />
                                  <input
                                   className="border border-gray-300 p-1 rounded-lg shadow-sm w-full mt-1"
                                   placeholder={`Field ${fieldIndex + 1} Options`}
                                   value={field.options || ''}
-                                  onChange={(e) => handleFieldChange(fieldIndex, 'options', e.target.value)}
                                 />
                                 <input
                                   className="border border-gray-300 p-1 rounded-lg shadow-sm w-full mt-1"
                                   placeholder={`Field ${fieldIndex + 1} Applicant Field Mapping`}
                                   value={field.applicantFieldMapping || ''}
-                                  onChange={(e) => handleFieldChange(fieldIndex, 'applicantFieldMapping', e.target.value)}
                                 />
                                  <input
                                   className="border border-gray-300 p-1 rounded-lg shadow-sm w-full mt-1"
                                   placeholder={`Field ${fieldIndex + 1} Sort Order`}
                                   type="number"
                                   value={field.sortOrder || 0}
-                                  onChange={(e) => handleFieldChange(fieldIndex, 'sortOrder', parseInt(e.target.value, 10))}
                                 />
                                 <label className="inline-flex items-center mt-2">
                                     <input
                                         type="checkbox"
                                         className="form-checkbox h-5 w-5 text-blue-600 rounded"
                                         checked={field.required || false}
-                                        onChange={(e) => handleFieldChange(fieldIndex, 'required', e.target.checked)}
                                     />
                                     <span className="ml-2 text-gray-700 text-sm">Required</span>
                                 </label>
@@ -193,39 +184,33 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
                       className="border border-gray-300 p-1 rounded-lg shadow-sm w-full"
                       placeholder={`Field ${fieldIndex + 1} Label`}
                       value={field.label || ''}
-                      onChange={(e) => handleFieldChange(fieldIndex, 'label', e.target.value)}
                     />
                      <input
                       className="border border-gray-300 p-1 rounded-lg shadow-sm w-full mt-1"
                       placeholder={`Field ${fieldIndex + 1} Type`}
                       value={field.type || ''}
-                      onChange={(e) => handleFieldChange(fieldIndex, 'type', e.target.value)}
                     />
                      <input
                       className="border border-gray-300 p-1 rounded-lg shadow-sm w-full mt-1"
                       placeholder={`Field ${fieldIndex + 1} Options`}
                       value={field.options || ''}
-                      onChange={(e) => handleFieldChange(fieldIndex, 'options', e.target.value)}
                     />
                     <input
                       className="border border-gray-300 p-1 rounded-lg shadow-sm w-full mt-1"
                       placeholder={`Field ${fieldIndex + 1} Applicant Field Mapping`}
                       value={field.applicantFieldMapping || ''}
-                      onChange={(e) => handleFieldChange(fieldIndex, 'applicantFieldMapping', e.target.value)}
                     />
                      <input
                       className="border border-gray-300 p-1 rounded-lg shadow-sm w-full mt-1"
                       placeholder={`Field ${fieldIndex + 1} Sort Order`}
                       type="number"
                       value={field.sortOrder || 0}
-                      onChange={(e) => handleFieldChange(fieldIndex, 'sortOrder', parseInt(e.target.value, 10))}
                     />
                     <label className="inline-flex items-center mt-2">
                         <input
                             type="checkbox"
                             className="form-checkbox h-5 w-5 text-blue-600 rounded"
                             checked={field.required || false}
-                            onChange={(e) => handleFieldChange(fieldIndex, 'required', e.target.checked)}
                         />
                         <span className="ml-2 text-gray-700 text-sm">Required</span>
                     </label>

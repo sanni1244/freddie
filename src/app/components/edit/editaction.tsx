@@ -35,8 +35,7 @@ const EditForm: React.FC<EditFormProps> = ({
             onFormUpdated(response.data);
             setSuccessMessage('Form updated successfully.');
             onCancel();
-        } catch (error: any) {
-            setErrorMessage(error.response?.data?.message || 'Error saving form.');
+        } catch (error) {
             console.error('Error saving form:', error);
         }
     }, [editedForm, managerId, onFormUpdated, setSuccessMessage, setErrorMessage, onCancel]);
@@ -50,7 +49,7 @@ const EditForm: React.FC<EditFormProps> = ({
     );
 
     const handleGroupChange = useCallback(
-        (groupIndex: number, fieldName: keyof FormGroup, value: any) => {
+        (groupIndex: number, fieldName: keyof FormGroup, value: null) => {
             setEditedForm(prev => {
                 const groups = [...(prev.groups || [])];
                 const group = groups[groupIndex] || { title: '', sortOrder: 0, fields: [] };
@@ -62,7 +61,7 @@ const EditForm: React.FC<EditFormProps> = ({
     );
 
     const handleFieldChange = useCallback(
-        (groupIndex: number | null, fieldIndex: number, fieldName: keyof Field, value: any) => {
+        (groupIndex: number | null, fieldIndex: number, fieldName: keyof Field, value: null) => {
             setEditedForm(prev => {
                 if (groupIndex === null) {
                     const fields = [...(prev.fields || [])];
@@ -159,14 +158,12 @@ const EditForm: React.FC<EditFormProps> = ({
                             value={group.title}
                             placeholder="Group Title"
                             className="flex-1 border p-2 rounded-lg"
-                            onChange={(e) => handleGroupChange(groupIndex, 'title', e.target.value)}
                         />
                         <input
                             type="number"
                             value={group.sortOrder}
                             placeholder="Sort Order"
                             className="w-32 border p-2 rounded-lg"
-                            onChange={(e) => handleGroupChange(groupIndex, 'sortOrder', parseInt(e.target.value))}
                         />
                         <button
                             type="button"
@@ -185,42 +182,38 @@ const EditForm: React.FC<EditFormProps> = ({
                                     value={field.label}
                                     placeholder="Label"
                                     className="border p-2 rounded"
-                                    onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'label', e.target.value)}
+                                    
                                 />
                                 <input
                                     type="text"
                                     value={field.type}
                                     placeholder="Type"
                                     className="border p-2 rounded"
-                                    onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'type', e.target.value)}
+                                    
                                 />
                                 <input
                                     type="text"
                                     value={field.options}
                                     placeholder="Options"
                                     className="border p-2 rounded"
-                                    onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'options', e.target.value)}
                                 />
                                 <input
                                     type="text"
                                     value={field.applicantFieldMapping}
                                     placeholder="Applicant Field Mapping"
                                     className="border p-2 rounded"
-                                    onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'applicantFieldMapping', e.target.value)}
                                 />
                                 <input
                                     type="number"
                                     value={field.sortOrder}
                                     placeholder="Sort Order"
                                     className="border p-2 rounded"
-                                    onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'sortOrder', parseInt(e.target.value))}
                                 />
                                 <label className="flex items-center">
                                     <input
                                         type="checkbox"
                                         checked={field.required}
                                         className="mr-2"
-                                        onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'required', e.target.checked)}
                                     />
                                     Required
                                 </label>

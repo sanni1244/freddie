@@ -22,9 +22,8 @@ const DisplayManagers: React.FC<DisplayManagersProps> = ({ managers, onEdit, onD
       }
       onDelete(managerId);
       setMessage('Manager deleted successfully.');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deleting manager:', error);
-      setMessage(error.message || 'Failed to delete manager.');
     } finally {
       setLoading(false);
     }

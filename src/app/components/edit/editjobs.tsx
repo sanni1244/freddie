@@ -76,9 +76,8 @@ const EditJob: React.FC<EditJobProps> = ({
       onJobUpdated(data);
       setMessage('Job updated successfully.');
       onCancel();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating job:', error);
-      setMessage(error.message || 'Failed to update job.');
     } finally {
       setLoading(false);
     }

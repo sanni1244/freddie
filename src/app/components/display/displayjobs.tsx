@@ -28,7 +28,7 @@ const DisplayJobs: React.FC<DisplayJobsProps> = ({
       await fetch(`/api/jobs/${jobId}?managerId=${selectedManagerId}`, { method: 'DELETE' });
       onDelete(jobId);
       setMessage('Job deleted.');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deleting job:', error);
       setMessage('Failed to delete job.');
     } finally {

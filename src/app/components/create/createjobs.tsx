@@ -76,9 +76,8 @@ const CreateJob: React.FC<CreateJobProps> = ({ onJobCreated, setLoading, setMess
         status: 'active',
       });
       setMessage('Job created successfully.');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating job:', error);
-      setMessage(error.response?.data?.message || error.message || 'Failed to create job.');
     } finally {
       setLoading(false);
     }

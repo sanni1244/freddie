@@ -22,9 +22,8 @@ const DisplayFormTemplates: React.FC<DisplayFormTemplatesProps> = ({ formTemplat
       }
       onDelete(formTemplateId);
       setMessage('Form template deleted successfully.');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deleting form template:', error);
-      setMessage(error.response?.data?.message || 'Failed to delete form template.');
     } finally {
       setLoading(false);
     }

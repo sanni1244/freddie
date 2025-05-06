@@ -29,8 +29,7 @@ const DisplayForms: React.FC<DisplayFormsProps> = ({
             onFormDeleted(formId);
             setSuccessMessage('Form deleted successfully.');
             setShowConfirmDelete(null); // Clear confirmation state on success
-        } catch (error: any) {
-            setErrorMessage(error.response?.data?.message || 'Error deleting form.');
+        } catch (error) {
             console.error('Error deleting form:', error);
         }
     };

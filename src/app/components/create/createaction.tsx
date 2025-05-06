@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useCallback } from 'react';
 import api from '@/lib/api';
-import { Form, Group, Field, FormGroup } from '@/types';
+import { Form, Field, FormGroup } from '@/types';
 
 interface CreateFormProps {
     managerId: string;
@@ -46,8 +46,7 @@ const CreateForm: React.FC<CreateFormProps> = ({
                 groups: [],
                 fields: [],
             });
-        } catch (error: any) {
-            setErrorMessage(error.response?.data?.message || 'Error creating form.');
+        } catch (error) {
             console.error('Error creating form:', error);
         }
     }, [managerId, newForm, onFormCreated, setErrorMessage, setSuccessMessage]);
@@ -61,7 +60,7 @@ const CreateForm: React.FC<CreateFormProps> = ({
     );
 
     const handleGroupChange = useCallback(
-        (groupIndex: number, fieldName: keyof FormGroup, value: any) => {
+        (groupIndex: number, fieldName: keyof FormGroup, value: null) => {
             setNewForm(prevTemplate => {
                 const newGroups = [...(prevTemplate.groups || [])];
                 const updatedGroup = { ...newGroups[groupIndex], [fieldName]: value };
@@ -73,7 +72,7 @@ const CreateForm: React.FC<CreateFormProps> = ({
     );
 
     const handleFieldChange = useCallback(
-        (groupIndex: number | null, fieldIndex: number, fieldName: keyof Field, value: any) => {
+        (groupIndex: number | null, fieldIndex: number, fieldName: keyof Field, value: null) => {
             setNewForm(prevTemplate => {
                 if (groupIndex === null) {
                     const newFields = [...(prevTemplate.fields || [])];
@@ -175,7 +174,6 @@ const CreateForm: React.FC<CreateFormProps> = ({
                                 placeholder={`Group ${groupIndex + 1} Title`}
                                 value={group.title || ''}
                                 name="title"
-                                onChange={(e) => handleGroupChange(groupIndex, 'title', e.target.value)}
                             />
                             <button
                                 type="button"
@@ -191,7 +189,6 @@ const CreateForm: React.FC<CreateFormProps> = ({
                             type="number"
                             name="sortOrder"
                             value={group.sortOrder || 0}
-                            onChange={(e) => handleGroupChange(groupIndex, 'sortOrder', parseInt(e.target.value, 10))}
                         />
 
                         {/* Group Fields */}
@@ -204,32 +201,27 @@ const CreateForm: React.FC<CreateFormProps> = ({
                                             className="border border-gray-300 p-2 rounded-lg shadow-sm"
                                             placeholder={`Field ${fieldIndex + 1} Label`}
                                             value={field.label || ''}
-                                            onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'label', e.target.value)}
                                         />
                                         <input
                                             className="border border-gray-300 p-2 rounded-lg shadow-sm"
                                             placeholder="Type"
                                             value={field.type || ''}
-                                            onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'type', e.target.value)}
                                         />
                                         <input
                                             className="border border-gray-300 p-2 rounded-lg shadow-sm"
                                             placeholder="Options"
                                             value={field.options || ''}
-                                            onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'options', e.target.value)}
                                         />
                                         <input
                                             className="border border-gray-300 p-2 rounded-lg shadow-sm"
                                             placeholder="Applicant Field Mapping"
                                             value={field.applicantFieldMapping || ''}
-                                            onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'applicantFieldMapping', e.target.value)}
                                         />
                                         <input
                                             className="border border-gray-300 p-2 rounded-lg shadow-sm"
                                             type="number"
                                             placeholder="Sort Order"
                                             value={field.sortOrder || 0}
-                                            onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'sortOrder', parseInt(e.target.value))}
                                         />
                                     </div>
                                     <button

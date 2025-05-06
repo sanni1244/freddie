@@ -39,9 +39,8 @@ const EditManager: React.FC<EditManagerProps> = ({ manager, onManagerUpdated, on
       onManagerUpdated(data);
       setMessage('Manager updated successfully.');
       onCancel();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating manager:', error);
-      setMessage(error.response?.data?.message || 'Failed to update manager.');
     } finally {
       setLoading(false);
     }

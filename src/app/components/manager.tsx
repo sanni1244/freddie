@@ -37,7 +37,7 @@ const DisplayManager = ({
 
   return (
     <div className="mt-6">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">Manager's Identities:</h2>
+      <h2 className="text-lg font-semibold text-gray-800 mb-4">Managers Identities:</h2>
       {identities.length > 0 ? (
         identities.map((identity) => (
           <div key={identity.id} className="mt-4 p-6 border rounded-xl shadow-sm bg-white">

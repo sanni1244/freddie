@@ -2,9 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
-import SuccessMessage from '../../components/success';
-import ErrorMessage from '../../components/error';
-import Back from '../../components/backbutton';
 import DisplayJobs from '../../components/display/displayjobs';
 import CreateJob from '../../components/create/createjobs';
 import EditJob from '../../components/edit/editjobs';

@@ -62,9 +62,8 @@ const CreateManager: React.FC<CreateManagerProps> = ({ onManagerCreated, setLoad
       setNewManager({ fullName: '', email: '', companyName: '', companyDescription: '' });
       setMessage('Manager created successfully.');
       setErrors({});
-    } catch (error: any) {
-      console.error('Error creating manager:', error);
-      setMessage(error.response?.data?.message || error.message || 'Failed to create manager.');
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
     }
