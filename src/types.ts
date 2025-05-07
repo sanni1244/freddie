@@ -60,6 +60,7 @@ export interface FormField {
 }
 
 export interface FormGroup {
+  id: string;
   title: string;
   fields: FormField[];
   sortOrder: number;

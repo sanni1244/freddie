@@ -45,22 +45,31 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
             setMessage('Please fill in all required fields.');
             return;
         }
-        const payload = {
+        const payload: Partial<FormTemplate> = {
             ...editedTemplate,
             title: editedTemplate.title?.trim(),
             formType: editedTemplate.formType?.trim(),
+            groups: editedTemplate.groups, // Include groups and fields in the payload
+            fields: editedTemplate.fields,
         };
 
         setLoading(true);
         try {
-            const response = await api.patch(`/form-templates/${editedTemplate.id}?managerId=${selectedManagerId}`, payload);
+            console.log("Payload being sent:", payload);
+            const response = await api.patch(
+                `/form-templates/${editedTemplate.id}?managerId=${selectedManagerId}`,
+                payload
+            );
+            console.log("Response from server:", response);
             const data: FormTemplate = response.data;
             onTemplateUpdated(data);
             setMessage('Form template updated successfully.');
             onCancel();
         } catch (error: any) {
             console.error('Error updating form template:', error);
-            setMessage(error.response?.data?.message || 'Failed to update form template.');
+            // **Important:** Ensure you're passing a string to setMessage
+            const errorMessage = error?.response?.data?.message || 'Failed to update form template.';
+            setMessage(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -71,27 +80,43 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
         setEditedTemplate((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleGroupChange = useCallback((groupIndex: number, fieldName: string, value: any) => { // Use useCallback
+    const handleGroupChange = useCallback((groupIndex: number, fieldName: string, value: any) => {
         setEditedTemplate(prevTemplate => {
-            if (!prevTemplate.groups) return { ...prevTemplate, groups: [{ title: '', sortOrder: 0, fields: [] }] };
-
-            const newGroups = [...prevTemplate.groups];
-            const groupToUpdate = { ...newGroups[groupIndex], [fieldName]: value };  //update the field
+            const newGroups = prevTemplate.groups ? [...prevTemplate.groups] : [];
+            if (!newGroups[groupIndex]) {
+                newGroups[groupIndex] = { title: '', sortOrder: 0, fields: [] }; // Initialize if group doesn't exist
+            }
+            const groupToUpdate = { ...newGroups[groupIndex], [fieldName]: value };
             newGroups[groupIndex] = groupToUpdate;
             return { ...prevTemplate, groups: newGroups };
         });
     }, []);
 
-    const handleFieldChange = useCallback((groupIndex: number, fieldIndex: number, fieldName: string, value: any) => { // Use useCallback
+    const handleFieldChange = useCallback((groupIndex: number, fieldIndex: number, fieldName: string, value: any) => {
         setEditedTemplate(prevTemplate => {
-            if (!prevTemplate.groups) return { ...prevTemplate, groups: [{ title: '', sortOrder: 0, fields: [] }] };
-
-            const newGroups = [...prevTemplate.groups];
-            if (!newGroups[groupIndex]?.fields) return { ...prevTemplate, groups: newGroups };
-            const newFields = [...newGroups[groupIndex].fields];
-            const fieldToUpdate = { ...newFields[fieldIndex], [fieldName]: value };
+            const newGroups = prevTemplate.groups ? [...prevTemplate.groups] : [];
+            if (!newGroups[groupIndex]) {
+                newGroups[groupIndex] = { title: '', sortOrder: 0, fields: [] };
+            }
+            const group = newGroups[groupIndex];
+            const newFields = group?.fields ? [...group.fields] : [];  // prevent undefined
+            if (!newFields[fieldIndex]) {
+                newFields[fieldIndex] = {    //initialize the field
+                    label: '',
+                    type: 'text',
+                    options: [],
+                    required: false,
+                    applicantFieldMapping: 'none',
+                    sortOrder: 0,
+                };
+            }
+            let updatedValue: any = value;
+            if (fieldName === 'options' && (newFields[fieldIndex].type === 'select' || newFields[fieldIndex].type === 'radio')) {
+                updatedValue = (typeof value === 'string') ? value.split(',').map(option => option.trim()) : value;
+            }
+            const fieldToUpdate = { ...newFields[fieldIndex], [fieldName]: updatedValue };
             newFields[fieldIndex] = fieldToUpdate;
-            newGroups[groupIndex] = { ...newGroups[groupIndex], fields: newFields };
+            newGroups[groupIndex] = { ...group, fields: newFields };
             return { ...prevTemplate, groups: newGroups };
         });
     }, []);
@@ -99,17 +124,18 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
     const handleAddFieldToGroup = useCallback((groupIndex: number) => {
         setEditedTemplate(prevTemplate => {
             const newGroups = prevTemplate.groups ? [...prevTemplate.groups] : [];
-            if (newGroups[groupIndex]) {
-                const updatedFields = [...(newGroups[groupIndex].fields || []), {
-                    label: '',
-                    type: 'text',
-                    options: [],
-                    required: false,
-                    applicantFieldMapping: 'none',
-                    sortOrder: 0
-                }];
-                newGroups[groupIndex] = { ...newGroups[groupIndex], fields: updatedFields };
+            if (!newGroups[groupIndex]) {
+                newGroups[groupIndex] = { title: '', sortOrder: 0, fields: [] };
             }
+            const updatedFields = [...(newGroups[groupIndex].fields || []), {
+                label: '',
+                type: 'text',
+                options: [],
+                required: false,
+                applicantFieldMapping: 'none',
+                sortOrder: 0
+            }];
+            newGroups[groupIndex] = { ...newGroups[groupIndex], fields: updatedFields };
             return { ...prevTemplate, groups: newGroups };
         });
     }, []);
@@ -299,7 +325,7 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
                         Add Group
                     </button>
                 </div>
-                 {/* Allow editing of root fields (outside groups) */}
+                {/* Allow editing of root fields (outside groups) */}
                 <div>
                     <label className="block text-sm font-semibold text-gray-700">Fields (Outside Groups)</label>
                     {editedTemplate.fields?.map((field, fieldIndex) => (
@@ -316,7 +342,7 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
                                     className="border border-gray-300 p-2 rounded-lg shadow-sm w-full"
                                     name="type"
                                     value={field.type || 'text'}
-                                     onChange={(e) => handleFieldChange(0, fieldIndex, 'type', e.target.value)}
+                                    onChange={(e) => handleFieldChange(0, fieldIndex, 'type', e.target.value)}
                                 >
                                     <option value="text">Text</option>
                                     <option value="textarea">Text Area</option>
@@ -331,7 +357,7 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
                                     <option value="checkbox">Checkbox</option>
                                     <option value="number">Number</option>
                                     <option value="rating">Rating</option>
-                                     <option value="radio">Radio</option>
+                                    <option value="radio">Radio</option>
                                     <option value="email">Email</option>
                                     <option value="document">Document</option>
                                     {/* Add more field types as needed */}
@@ -340,10 +366,10 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
                                     className="border border-gray-300 p-2 rounded-lg shadow-sm w-full"
                                     placeholder={`Field ${fieldIndex + 1} Options`}
                                     name="options"
-                                     value={Array.isArray(field.options) ? field.options.join(', ') : field.options || ''}
+                                    value={Array.isArray(field.options) ? field.options.join(', ') : field.options || ''}
                                     onChange={(e) => {
-                                         const optionsValue = e.target.value.split(',').map(option => option.trim());
-                                         handleFieldChange(0, fieldIndex, 'options', optionsValue);
+                                        const optionsValue = e.target.value.split(',').map(option => option.trim());
+                                        handleFieldChange(0, fieldIndex, 'options', optionsValue);
                                     }}
                                 />
                                 <select
@@ -374,21 +400,21 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
                                         className="form-checkbox h-5 w-5 text-blue-600 rounded"
                                         name="required"
                                         checked={field.required || false}
-                                         onChange={(e) => handleFieldChange(0, fieldIndex, 'required', e.target.checked)}
+                                        onChange={(e) => handleFieldChange(0, fieldIndex, 'required', e.target.checked)}
                                     />
                                     <span className="ml-2 text-gray-700 text-sm">Required</span>
                                 </label>
-                                 <button
-                                            type="button"
-                                            className="bg-red-500 hover:bg-red-700 text-white px-2 py-1 rounded-md shadow-sm"
-                                            onClick={() => removeFieldFromGroup(0, fieldIndex)}
-                                        >
-                                            Remove Field
+                                <button
+                                    type="button"
+                                    className="bg-red-500 hover:bg-red-700 text-white px-2 py-1 rounded-md shadow-sm"
+                                    onClick={() => removeFieldFromGroup(0, fieldIndex)}
+                                >
+                                    Remove Field
                                 </button>
                             </div>
                         </div>
                     ))}
-                     <button
+                    <button
                         type="button"
                         className="bg-blue-500 hover:bg-blue-700 text-white px-3 py-1 rounded-md shadow-sm mt-2"
                         onClick={() => handleAddFieldToGroup(0)}
