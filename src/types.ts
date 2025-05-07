@@ -53,7 +53,7 @@ export type Manager = {
 export interface FormField {
   label: string;
   type: string;
-  options?: string;
+  options?: string[];
   required: boolean;
   applicantFieldMapping?: string;
   sortOrder: number;
@@ -85,30 +85,11 @@ export interface Field {
   id?: string;
   label: string;
   type: string;
-  options?: string; // e.g., for select fields
-  required: boolean;
+  required: string[];
+  options?: string[];
   applicantFieldMapping?: string;
   sortOrder: number;
-}
-
-
-
-
-
-
-
-export interface Field {
-  label: string;
-  type: string;
-  options?: string;
-  required: boolean;
-  applicantFieldMapping?: string;
-  sortOrder: number;
-}
-
-export interface Group {
-  title: string;
-  sortOrder: number;
+  
 }
 
 export interface Form {
@@ -123,35 +104,10 @@ export interface Form {
 export interface FormField {
   label: string;
   type: string;
-  options?: string;
   required: boolean;
   applicantFieldMapping?: string;
   sortOrder: number;
-}
-
-export interface FormField {
   id?: string; 
-  label: string;
-  type: string;
-  options?: string;
-  required: boolean;
-  applicantFieldMapping?: string;
-  sortOrder: number;
-  placeholder?: string;
-  helpText?: string;
-  defaultValue?: string;
-  validationPattern?: string;
-}
-
-
-export interface FormField {
-  id?: string;
-  label: string;
-  type: string;
-  options?: string;
-  required: boolean;
-  applicantFieldMapping?: string;
-  sortOrder: number;
   placeholder?: string;
   helpText?: string;
   defaultValue?: string;
@@ -162,4 +118,14 @@ export interface FormGroupTemplate {
   id?: string;
   title: string;
   fields: FormField[];
+}
+
+export interface LocalField {
+  id?: string;
+  label: string;
+  type: string;
+  options?: string; // Keep as string for input
+  required?: boolean;
+  applicantFieldMapping?: string;
+  sortOrder: number;
 }

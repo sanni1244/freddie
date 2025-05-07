@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import CreateTemplate from '../../components/create/createtemplate';
 import EditTemplate from '../../components/edit/edittemplate';
-import { Manager, FormTemplate } from '@/types'; 
+import { Manager, FormTemplate } from '@/types';
 
-const FormTemplatesPage = () => { 
+const FormTemplatesPage = () => {
   const [managers, setManagers] = useState<Manager[]>([]);
   const [selectedManagerId, setSelectedManagerId] = useState<string | null>(null);
   const [templates, setTemplates] = useState<FormTemplate[]>([]);
@@ -35,9 +35,14 @@ const FormTemplatesPage = () => {
         return;
       }
       setLoading(true);
+      setMessage(null);
       try {
-        const response = await api.get(`/form-templates?managerId=${selectedManagerId}`);
-        setTemplates(response.data);
+        const response = await fetch(`https://api-freddie.ai-wk.com/form-templates?managerId=${selectedManagerId}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data: FormTemplate[] = await response.json();
+        setTemplates(data);
       } catch (error) {
         console.error('Error fetching form templates:', error);
         setMessage('Failed to load form templates.');
@@ -102,7 +107,7 @@ const FormTemplatesPage = () => {
       {loading && <p className="text-blue-600 font-medium animate-pulse">Loading...</p>}
 
       {selectedManagerId && !isEditing && (
-        <CreateTemplate 
+        <CreateTemplate
           onTemplateCreated={handleTemplateCreated}
           setLoading={setLoading}
           setMessage={setMessage}
@@ -119,6 +124,67 @@ const FormTemplatesPage = () => {
           setMessage={setMessage}
           selectedManagerId={selectedManagerId}
         />
+      )}
+
+      {selectedManagerId && templates.length > 0 && !isEditing && (
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {templates.map((template) => (
+            <div key={template.id} className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">{template.title}</h2>
+              <p className="text-gray-600 mb-2">Type: {template.formType}</p>
+
+              {template.groups && template.groups.length > 0 && (
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-gray-700 mb-1">Groups:</h3>
+                  <ul>
+                    {template.groups.map((group) => (
+                      <li key={group.title} className="text-gray-500 mb-2">
+                        <span className="font-medium">{group.title}</span>
+                        {group.fields && group.fields.length > 0 && (
+                          <ul className="ml-4">
+                            <li className="text-sm text-gray-600">Fields:</li>
+                            {group.fields.map((field, index) => (
+                              <li key={`${group.title}-${index}`} className="text-xs text-gray-500">
+                                - {field.label} ({field.type})
+                                {field.required && <span className="ml-1 text-red-500">*</span>}
+                                {field.applicantFieldMapping && <span className="ml-1 italic">({field.applicantFieldMapping})</span>}
+                                {field.options && <span className="ml-1">Options: {field.options}</span>}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {template.fields && template.fields.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-700 mt-2 mb-1">Top-Level Fields:</h3>
+                  <ul>
+                    {template.fields.map((field, index) => (
+                      <li key={`field-${index}`} className="text-sm text-gray-500">
+                        - {field.label} ({field.type})
+                        {field.required && <span className="ml-1 text-red-500">*</span>}
+                        {field.applicantFieldMapping && <span className="ml-1 italic">({field.applicantFieldMapping})</span>}
+                        {field.options && <span className="ml-1">Options: {field.options}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <button
+                onClick={() => handleEdit(template)}
+                className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              >
+                Edit
+              </button>
+              {/* You might want to add a delete button here as well */}
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
