@@ -69,10 +69,16 @@ export interface FormGroup {
 export interface FormTemplate {
   id: string;
   title: string;
+  name: string;
+  group: string;
   managerId: string;
   formType: string;
   groups: FormGroup[];
   fields: FormField[];
+  description?: string;
+  createdAt?: string;
+  updatedAt?: string; 
+  version?: number;
 }
 
 export interface Group {
