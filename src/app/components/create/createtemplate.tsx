@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
-import { FormTemplate, Group } from '@/types'; // Assuming these types exist
-import api from '@/lib/api'; // Assuming this is a properly configured API client
+import { FormTemplate, Group } from '@/types'; 
+import api from '@/lib/api'; 
 
 interface CreateTemplateProps {
     onTemplateCreated: (newTemplate: FormTemplate) => void;
@@ -13,7 +13,7 @@ interface CreateTemplateProps {
 interface Field {
     label: string;
     type: string;
-    options?: string[] | string; // Corrected: options can be string[] or string
+    options?: string[] | string; 
     required?: boolean;
     applicantFieldMapping?: string;
     sortOrder?: number;

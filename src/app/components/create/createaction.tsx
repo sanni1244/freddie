@@ -280,7 +280,6 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({
                     </button>
                 </div>
             ))}
-
             <button
                 type="button"
                 onClick={handleAddGroup}

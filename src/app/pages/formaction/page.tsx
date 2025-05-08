@@ -206,8 +206,8 @@ const FormTemplatesPage = () => {
           <p className="text-gray-600 text-sm mb-4">
             {selectedTemplate.formType.toUpperCase()} FORM
           </p>
-          {selectedTemplate.groups.map((group) => (
-            <div key={group.id} className="mb-4">
+          {selectedTemplate.groups.map((group, index) => (
+            <div key={index} className="mb-4">
               <h3 className="text-lg font-medium text-gray-700 mb-2 border-b pb-2">{group.title}</h3>
               {group.fields.map((field) => (
                 <div key={field.id} className="mb-3">
