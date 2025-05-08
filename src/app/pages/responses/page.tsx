@@ -2,180 +2,392 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
+import { FormTemplate } from '@/types';
 import api from '@/lib/api';
 
-// Placeholder for the Create Form Response component (will be in a separate file)
-const CreateFormResponse = () => {
-  return (
-    <div>
-      <button>Create Response</button>
-    </div>
-  );
+interface CreateFormProps {
+    onResponseCreated: () => void;
+    formId: string;
+    managerId: string | null;
+}
+
+const CreateFormResponse: React.FC<CreateFormProps> = ({ onResponseCreated, formId, managerId }) => {
+    const handleCreate = () => {
+        console.log('Creating new response for form:', formId, 'and manager:', managerId);
+        onResponseCreated();
+    };
+
+    return (
+        <div>
+            <button
+                onClick={handleCreate}
+                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+                Create Response
+            </button>
+        </div>
+    );
 };
 
-// Placeholder for the Delete Form Response component (will be in a separate file)
-const DeleteFormResponse = ({ applicantId }: { applicantId: string }) => {
-  const handleDelete = () => {
-    // Implement your delete logic here using the applicantId and the api function
-    console.log(`Deleting response for applicant: ${applicantId}`);
-    // Example of how you might use the api function for deletion (you'll need to define the endpoint)
-    // api.delete(`/forms-responses/${formId}/${applicantId}`)
-    //   .then(() => {
-    //     // Handle successful deletion (e.g., refresh the list)
-    //   })
-    //   .catch((error) => {
-    //     console.error('Error deleting response:', error);
-    //     // Handle error display
-    //   });
-  };
+interface DeleteFormResponseProps {
+    applicantId: string;
+    onResponseDeleted: () => void;
+    formId: string;
+}
 
-  return (
-    <button onClick={handleDelete}>
-      Delete
-    </button>
-  );
+const DeleteFormResponse: React.FC<DeleteFormResponseProps> = ({ applicantId, onResponseDeleted, formId }) => {
+    const handleDelete = async () => {
+        try {
+            const response = await api.delete(`/forms-responses/<span class="math-inline">\{formId\}/</span>{applicantId}`);
+            if (response.status === 204) {
+                onResponseDeleted();
+            }
+        } catch (error) {
+            console.error('Error deleting response:', error);
+        }
+    };
+
+    return (
+        <button
+            onClick={handleDelete}
+            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm"
+        >
+            Delete
+        </button>
+    );
 };
+
+interface Manager {
+    id: string;
+    fullName: string;
+}
+
+interface Job {
+    id: string;
+    title: string;
+}
+
+interface Form {
+    id: string;
+    title: string;
+}
 
 interface Response {
-  label: string;
-  value: any;
-  fileUrl: string;
-  fieldId: string;
-  createdAt: string;
+    label: string;
+    value: any;
+    fileUrl: string;
+    fieldId: string;
+    createdAt: string;
 }
 
 interface FormResponse {
-  applicantId: string;
-  createdAt: string;
-  responses: Response[];
+    applicantId: string;
+    createdAt: string;
+    responses: Response[];
 }
 
 interface ApiResponse {
-  data: FormResponse[];
-  total: number;
-  page: number;
-  limit: number;
+    data: FormResponse[];
+    total: number;
+    page: number;
+    limit: number;
 }
 
 const FormResponsesPage = () => {
-  const router = useRouter();
-  const { formId } = useParams();
-  const searchParams = useSearchParams();
+    const router = useRouter();
+    const { formId: routeFormId } = useParams();
+    const searchParams = useSearchParams();
+    const [templates, setTemplates] = useState<FormTemplate[]>([]);
+    const [managers, setManagers] = useState<Manager[]>([]);
+    const [selectedManagerId, setSelectedManagerId] = useState<string | null>(null);
+    const [jobs, setJobs] = useState<Job[]>([]);
+    const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+    const [selectedTemplate, setSelectedTemplate] = useState<FormTemplate | null>(null);
+    const [isEditing, setIsEditing] = useState(false);
 
-  const [responsesData, setResponsesData] = useState<ApiResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(parseInt(searchParams.get('page') || '1', 10));
-  const [limit, setLimit] = useState(parseInt(searchParams.get('limit') || '20', 10));
-  const managerId = searchParams.get('managerId');
+    const [editedTemplate, setEditedTemplate] = useState<FormTemplate | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState<string | null>(null);
+    const [forms, setForms] = useState<Form[]>([]);
+    const [selectedFormId, setSelectedFormId] = useState<string | null>(
+        typeof routeFormId === 'string' ? routeFormId : null
+    );
+    const [responsesData, setResponsesData] = useState<ApiResponse | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [fetchError, setFetchError] = useState<string | null>(null);
+    const [page, setPage] = useState(parseInt(searchParams.get('page') || '1', 10));
+    const [limit] = useState(parseInt(searchParams.get('limit') || '20', 10));
 
-  useEffect(() => {
-    const fetchFormResponses = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const apiUrl = `/forms-responses/${formId}`;
-        const params: Record<string, string> = {
-          limit: String(limit),
-          page: String(page),
-        };
-        if (managerId) {
-          params.managerId = managerId;
+    const fetchManagers = async () => {
+        try {
+            const response = await api.get('/managers');
+            setManagers(response.data);
+        } catch (error: any) {
+            setFetchError(error.message || 'Failed to load managers.');
         }
-
-        const data: ApiResponse = await api.get(apiUrl, { params });
-        setResponsesData(data);
-      } catch (e: any) {
-        setError(e.message || 'Failed to fetch form responses');
-        console.error('Error fetching form responses:', e);
-      } finally {
-        setLoading(false);
-      }
     };
 
-    fetchFormResponses();
-  }, [formId, managerId, limit, page]);
+    const fetchJobsByManager = async () => {
+        if (!selectedManagerId) {
+            setJobs([]);
+            return;
+        }
+        setLoading(true);
+        try {
+            const response = await api.get(`/jobs?managerId=${selectedManagerId}`);
+            setJobs(response.data);
+        } catch (error: any) {
+            console.error('Error fetching jobs:', error);
+            setFetchError(error.message || 'Failed to load jobs.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  const handlePageChange = (newPage: number) => {
-    const newSearchParams = new URLSearchParams(searchParams.toString());
-    newSearchParams.set('page', String(newPage));
-    router.push(`/forms-responses/${formId}?${newSearchParams.toString()}`);
-    setPage(newPage);
-  };
+    const fetchFormsByJobAndManager = async () => {
+        if (!selectedManagerId || !selectedJobId) {
+            setForms([]);
+            setSelectedFormId(null);
+            setResponsesData(null);
+            return;
+        }
+        try {
+            const response = await api.get(`/form-templates?managerId${selectedManagerId}`);
+            setForms(response.data);
+            console.log(response.data);
+            if (routeFormId && typeof routeFormId === 'string' &&
+                response.data.some((form: Form) => form.id === routeFormId)) {
+                setSelectedFormId(routeFormId);
+            } else if (response.data.length > 0) {
+                setSelectedFormId(response.data[0].id);
+            } else {
+                setSelectedFormId(null);
+                setResponsesData(null);
+            }
+        } catch (error: any) {
+            setFetchError(error.message || 'Failed to load forms.');
+            setForms([]);
+            setSelectedFormId(null);
+            setResponsesData(null);
+        }
+    };
 
-  return (
-    <div>
-      <h2>Form Responses for Form ID: {formId}</h2>
 
-      <CreateFormResponse />
+    const fetchFormResponses = async () => {
+        if (!selectedManagerId || !selectedFormId) {
+            setResponsesData(null);
+            return;
+        }
+        setLoading(true);
+        setError(null);
 
-      {loading ? (
-        <p>Loading form responses...</p>
-      ) : error ? (
-        <p style={{ color: 'red' }}>{error}</p>
-      ) : responsesData && responsesData.data.length > 0 ? (
-        <>
-          <table>
-            <thead>
-              <tr>
-                <th>Applicant ID</th>
-                <th>Created At</th>
-                <th>Responses</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {responsesData.data.map((response) => (
-                <tr key={response.applicantId}>
-                  <td>{response.applicantId}</td>
-                  <td>{new Date(response.createdAt).toLocaleString()}</td>
-                  <td>
-                    {response.responses.map((res, index) => (
-                      <div key={index} style={{ marginBottom: '1em' }}>
-                        <p>
-                          <strong>{res.label}:</strong>
-                        </p>
-                        <p>{JSON.stringify(res.value)}</p>
-                        {res.fileUrl && (
-                          <p style={{ fontSize: '0.8em' }}>
-                            File URL: {res.fileUrl}
-                          </p>
-                        )}
-                      </div>
+        try {
+            // const params = {
+            //     limit: String(limit),
+            //     page: String(page),
+            //     managerId: selectedManagerId,
+            // };
+            console.log(selectedManagerId);
+            console.log(selectedJobId);
+            console.log(selectedFormId);
+            const response = await api.get(`/forms-responses/${selectedFormId}?managerId=${selectedManagerId}&limit=20&page=1`);
+            if (response && response.data) {
+                setResponsesData(response.data);
+            } else {
+                setResponsesData(null);
+            }
+        } catch (error: any) {
+            setError(error.message || 'Failed to fetch form responses');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    // /forms-responses/${selectedFormId}?managerId=${selectedManagerId}                &limit=20&page=1`); 
+    // /forms-responses/w32435           ?managerId=a1e2d3c4-b5a6-7d8e-9f0a-1b2c3d4e5f6g&limit=20&page=1
+    // /forms-responses/w32435?managerId=a1e2d3c4-b5a6-7d8e-9f0a-1b2c3d4e5f6g
+
+
+    useEffect(() => {
+        fetchManagers();
+    }, []);
+
+    useEffect(() => {
+        fetchJobsByManager();
+    }, [selectedManagerId]);
+
+    useEffect(() => {
+        fetchFormsByJobAndManager();
+    }, [selectedManagerId, selectedJobId, routeFormId]);
+
+    useEffect(() => {
+        fetchFormResponses();
+    }, [selectedManagerId, selectedFormId, limit, page]);
+
+    const handleManagerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setSelectedManagerId(e.target.value);
+    };
+
+    const handleJobChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newJobId = e.target.value;
+        setSelectedJobId(newJobId);
+        setTemplates([]);
+        setSelectedTemplate(null);
+        setIsEditing(false);
+        setEditedTemplate(null);
+    };
+
+    const handleFormChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newFormId = e.target.value;
+        setSelectedFormId(newFormId);
+        setResponsesData(null);
+    };
+
+    return (
+        <div className="p-6 max-w-7xl mx-auto min-h-screen">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Form Responses</h2>
+
+            {fetchError && <p className="text-red-500 mb-4">{fetchError}</p>}
+
+            <div className="mb-4">
+                <label htmlFor="managerSelect" className="block text-gray-700 text-sm font-bold mb-2">
+                    Select Manager:
+                </label>
+                <select
+                    id="managerSelect"
+                    onChange={handleManagerChange}
+                    value={selectedManagerId || ''}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                >
+                    <option value="">Select a Manager</option>
+                    {managers.map((manager) => (
+                        <option key={manager.id} value={manager.id}>
+                            {manager.fullName}
+                        </option>
                     ))}
-                  </td>
-                  <td>
-                    <DeleteFormResponse applicantId={response.applicantId} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {responsesData.total > 0 && (
-            <div style={{ marginTop: '1em', display: 'flex', justifyContent: 'center' }}>
-              <button
-                disabled={page === 1}
-                onClick={() => handlePageChange(page - 1)}
-              >
-                Previous
-              </button>
-              <span>
-                Page {page} of {Math.ceil(responsesData.total / responsesData.limit)}
-              </span>
-              <button
-                disabled={page === Math.ceil(responsesData.total / responsesData.limit)}
-                onClick={() => handlePageChange(page + 1)}
-              >
-                Next
-              </button>
+                </select>
             </div>
-          )}
-        </>
-      ) : (
-        <p>No responses found for this form.</p>
-      )}
-    </div>
-  );
+
+            {selectedManagerId && (
+                <div className="mb-4">
+                    <label htmlFor="jobSelect" className="block text-gray-700 text-sm font-bold mb-2">
+                        Select Job:
+                    </label>
+                    <select
+                        id="jobSelect"
+                        onChange={handleJobChange}
+                        value={selectedJobId || ''}
+                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        disabled={jobs.length === 0}
+                    >
+                        <option value="">Select a Job</option>
+                        {jobs.map((job) => (
+                            <option key={job.id} value={job.id}>
+                                {job.title}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )}
+
+            {selectedJobId && (
+                <div className="mb-4">
+                    <label htmlFor="formSelect" className="block text-gray-700 text-sm font-bold mb-2">
+                        Select Form:
+                    </label>
+                    <select
+                        id="formSelect"
+                        onChange={handleFormChange}
+                        value={selectedFormId || ''}
+                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        disabled={forms.length === 0}
+                    >
+                        <option value="">Select a Form</option>
+                        {forms.map((form) => (
+                            <option key={form.id} value={form.id}>
+                                {form.title}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )}
+
+            {loading ? (
+                <p className="text-blue-500 italic">Loading form responses...</p>
+            ) : error ? (
+                <p className="text-red-500">{error}</p>
+            ) : responsesData && responsesData.data.length > 0 ? (
+                <div className="overflow-x-auto">
+                    <table className="min-w-full leading-normal">
+                        <thead className="bg-gray-100">
+                            <tr>
+                                <th className="px-5 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Applicant ID
+                                </th>
+                                <th className="px-5 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Created At
+                                </th>
+                                <th className="px-5 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Responses
+                                </th>
+                                <th className="px-5 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {responsesData.data.map((response) => (
+                                <tr key={response.applicantId}>
+                                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                        {response.applicantId}
+                                    </td>
+                                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                        {new Date(response.createdAt).toLocaleString()}
+                                    </td>
+                                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                        {response.responses.map((res, index) => (
+                                            <div key={index} className="mb-2">
+                                                <p className="font-semibold">{res.label}:</p>
+                                                <p>{JSON.stringify(res.value)}</p>
+                                                {res.fileUrl && (
+                                                    <p className="text-gray-500 text-xs">
+                                                        File URL: {res.fileUrl}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </td>
+                                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                        {/* You might want to add a delete button here */}
+                                        {/* <DeleteFormResponse
+                                            applicantId={response.applicantId}
+                                            formId={selectedFormId!}
+                                            onResponseDeleted={() => fetchFormResponses()}
+                                        /> */}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+
+                    {responsesData.total > 0 && (
+                        <div className="px-5 py-3 bg-white border-t flex flex-col xs:flex-row items-center xs:justify-between">
+                            <span className="text-xs text-gray-500">
+                                Page {page} of {Math.ceil(responsesData.total / responsesData.limit)}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            ) : selectedManagerId && selectedFormId && !loading && !error ? (
+                <p className="text-gray-600">No responses found for the selected manager and form.</p>
+            ) : selectedManagerId && !fetchError ? (
+                <p className="text-gray-600">Please select a form to view responses.</p>
+            ) : (
+                <p className="text-gray-600">Please select a manager to view forms.</p>
+            )}
+        </div>
+    );
 };
 
 export default FormResponsesPage;
