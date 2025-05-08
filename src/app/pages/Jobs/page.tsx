@@ -6,6 +6,7 @@ import DisplayJobs from '../../components/display/displayjobs';
 import CreateJob from '../../components/create/createjobs';
 import EditJob from '../../components/edit/editjobs';
 import { Manager, Job } from '@/types';
+import BackButton from '@/app/components/backbutton';
 
 const JobsPage = () => {
   const [managers, setManagers] = useState<Manager[]>([]);
@@ -76,7 +77,8 @@ const JobsPage = () => {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto bg-gradient-to-b from-white to-blue-50 min-h-screen">
+    <div className="relative p-6 max-w-7xl mx-auto bg-gradient-to-b from-white to-blue-50 min-h-screen">
+      <BackButton />
       <h1 className="text-3xl font-extrabold mb-8 text-blue-900 drop-shadow-md">📋 Manage Jobs</h1>
       {message && (
         <div className="mb-4 text-sm text-red-700 bg-red-100 border border-red-300 p-3 rounded-md shadow-sm">

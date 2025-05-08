@@ -3,11 +3,11 @@ import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import SuccessMessage from '../../components/success';
 import ErrorMessage from '../../components/error';
-import Back from '../../components/backbutton';
 import DisplayManagerIdentities from '../../components/display/displayidentites';
 import CreateIdentity from '../../components/create/createidentities';
 import EditIdentity from '../../components/edit/editidentities';
 import { Identity, Manager } from '@/types';
+import BackButton from '../../components/backbutton';
 
 const IdentityPage = () => {
   const [managers, setManagers] = useState<Manager[]>([]);
@@ -57,7 +57,6 @@ const IdentityPage = () => {
     const selectedManager = managers.find((manager) => manager.id === selectedId);
     setSelectedManagerName(selectedManager ? selectedManager.fullName : null);
   };
-  
 
   const handleIdentityUpdated = (updatedIdentities: Identity[]) => {
     setIdentities(updatedIdentities);
@@ -79,8 +78,7 @@ const IdentityPage = () => {
 
   return (
     <div className="relative">
-      <Back />
-
+      <BackButton />
       <div className="container mx-auto p-8 bg-gray-50 rounded-lg shadow-lg">
         {successMessage && <SuccessMessage message={successMessage} />}
         {errorMessage && <ErrorMessage message={errorMessage} />}

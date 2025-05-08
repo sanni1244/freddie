@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { FormTemplate } from '@/types';
 import api from '@/lib/api';
+import BackButton from '@/app/components/backbutton';
 
 interface CreateFormProps {
     onResponseCreated: () => void;
@@ -34,28 +35,6 @@ interface DeleteFormResponseProps {
     onResponseDeleted: () => void;
     formId: string;
 }
-
-const DeleteFormResponse: React.FC<DeleteFormResponseProps> = ({ applicantId, onResponseDeleted, formId }) => {
-    const handleDelete = async () => {
-        try {
-            const response = await api.delete(`/forms-responses/${formId}/${applicantId}`);
-            if (response.status === 204) {
-                onResponseDeleted();
-            }
-        } catch (error) {
-            console.error('Error deleting response:', error);
-        }
-    };
-
-    return (
-        <button
-            onClick={handleDelete}
-            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm"
-        >
-            Delete
-        </button>
-    );
-};
 
 interface Manager {
     id: string;
@@ -102,12 +81,7 @@ const FormResponsesPage = () => {
     const [selectedManagerId, setSelectedManagerId] = useState<string | null>(null);
     const [jobs, setJobs] = useState<Job[]>([]);
     const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
-    const [selectedTemplate, setSelectedTemplate] = useState<FormTemplate | null>(null);
-    const [isEditing, setIsEditing] = useState(false);
-
-    const [editedTemplate, setEditedTemplate] = useState<FormTemplate | null>(null);
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState<string | null>(null);
     const [forms, setForms] = useState<Form[]>([]);
     const [selectedFormId, setSelectedFormId] = useState<string | null>(null);
     const [responsesData, setResponsesData] = useState<ApiResponse | null>(null);
@@ -151,7 +125,7 @@ const FormResponsesPage = () => {
             const response = await api.get(`/forms?jobId=${selectedJobId}&managerId=${selectedManagerId}`);
             setForms(response.data);
             console.log(response.data);
-           if (response.data.length > 0) {
+            if (response.data.length > 0) {
                 setSelectedFormId(response.data[0].id);
             } else {
                 setSelectedFormId(null);
@@ -189,12 +163,6 @@ const FormResponsesPage = () => {
         }
     };
 
-
-    // /forms-responses/${selectedFormId}?managerId=${selectedManagerId}                                          &limit=20&page=1`);
-    // /forms-responses/w32435                                          ?managerId=a1e2d3c4-b5a6-7d8e-9f0a-1b2c3d4e5f6g&limit=20&page=1
-    // /forms-responses/w32435?managerId=a1e2d3c4-b5a6-7d8e-9f0a-1b2c3d4e5f6g
-
-
     useEffect(() => {
         fetchManagers();
     }, []);
@@ -219,9 +187,6 @@ const FormResponsesPage = () => {
         const newJobId = e.target.value;
         setSelectedJobId(newJobId);
         setTemplates([]);
-        setSelectedTemplate(null);
-        setIsEditing(false);
-        setEditedTemplate(null);
     };
 
     const handleFormChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -231,11 +196,10 @@ const FormResponsesPage = () => {
     };
 
     return (
-        <div className="p-6 max-w-7xl mx-auto min-h-screen">
+        <div className="relative p-6 max-w-7xl mx-auto min-h-screen">
+            <BackButton />
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">Form Responses</h2>
-
             {fetchError && <p className="text-red-500 mb-4">{fetchError}</p>}
-
             <div className="mb-4">
                 <label htmlFor="managerSelect" className="block text-gray-700 text-sm font-bold mb-2">
                     Select Manager:

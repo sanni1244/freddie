@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
-import { FormTemplate, FormGroup, Field } from '@/types'; // Assuming these types exist
-import api from '@/lib/api'; // Assuming this is a properly configured API client
+import { FormTemplate, FormGroup, Field } from '@/types';
+import api from '@/lib/api';
 
 interface EditTemplateProps {
     template: FormTemplate;
@@ -26,7 +26,7 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
         setEditedTemplate(template);
     }, [template]);
 
-    // Basic validation - extend as needed for your specific requirements
+    // Basic validation when making changes
     const isValidTemplate = (template: Partial<FormTemplate>) => {
         const requiredFields = [
             template.title?.trim(),
@@ -49,7 +49,7 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
             ...editedTemplate,
             title: editedTemplate.title?.trim(),
             formType: editedTemplate.formType?.trim(),
-            groups: editedTemplate.groups, // Include groups and fields in the payload
+            groups: editedTemplate.groups,
             fields: editedTemplate.fields,
         };
 
@@ -67,7 +67,6 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
             onCancel();
         } catch (error: any) {
             console.error('Error updating form template:', error);
-            // **Important:** Ensure you're passing a string to setMessage
             const errorMessage = error?.response?.data?.message || 'Failed to update form template.';
             setMessage(errorMessage);
         } finally {
@@ -84,7 +83,7 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
         setEditedTemplate(prevTemplate => {
             const newGroups = prevTemplate.groups ? [...prevTemplate.groups] : [];
             if (!newGroups[groupIndex]) {
-                newGroups[groupIndex] = { title: '', sortOrder: 0, fields: [] }; // Initialize if group doesn't exist
+                newGroups[groupIndex] = { title: '', sortOrder: 0, fields: [] }; 
             }
             const groupToUpdate = { ...newGroups[groupIndex], [fieldName]: value };
             newGroups[groupIndex] = groupToUpdate;
@@ -99,9 +98,9 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
                 newGroups[groupIndex] = { title: '', sortOrder: 0, fields: [] };
             }
             const group = newGroups[groupIndex];
-            const newFields = group?.fields ? [...group.fields] : [];  // prevent undefined
+            const newFields = group?.fields ? [...group.fields] : []; 
             if (!newFields[fieldIndex]) {
-                newFields[fieldIndex] = {    //initialize the field
+                newFields[fieldIndex] = {    
                     label: '',
                     type: 'text',
                     options: [],
@@ -254,7 +253,6 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
                                                 <option value="radio">Radio</option>
                                                 <option value="email">Email</option>
                                                 <option value="document">Document</option>
-                                                {/* Add more field types as needed */}
                                             </select>
                                             <input
                                                 className="border border-gray-300 p-2 rounded-lg shadow-sm w-full"
@@ -361,7 +359,6 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
                                     <option value="radio">Radio</option>
                                     <option value="email">Email</option>
                                     <option value="document">Document</option>
-                                    {/* Add more field types as needed */}
                                 </select>
                                 <input
                                     className="border border-gray-300 p-2 rounded-lg shadow-sm w-full"

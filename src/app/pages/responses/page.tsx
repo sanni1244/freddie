@@ -2,96 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { FormTemplate } from '@/types';
+import { FormTemplate, Manager, Form, Job, ApiResponse } from '@/types';
 import api from '@/lib/api';
-
-interface CreateFormProps {
-    onResponseCreated: () => void;
-    formId: string;
-    managerId: string | null;
-}
-
-const CreateFormResponse: React.FC<CreateFormProps> = ({ onResponseCreated, formId, managerId }) => {
-    const handleCreate = () => {
-        console.log('Creating new response for form:', formId, 'and manager:', managerId);
-        onResponseCreated();
-    };
-
-    return (
-        <div>
-            <button
-                onClick={handleCreate}
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            >
-                Create Response
-            </button>
-        </div>
-    );
-};
-
-interface DeleteFormResponseProps {
-    applicantId: string;
-    onResponseDeleted: () => void;
-    formId: string;
-}
-
-const DeleteFormResponse: React.FC<DeleteFormResponseProps> = ({ applicantId, onResponseDeleted, formId }) => {
-    const handleDelete = async () => {
-        try {
-            const response = await api.delete(`/forms-responses/<span class="math-inline">\{formId\}/</span>{applicantId}`);
-            if (response.status === 204) {
-                onResponseDeleted();
-            }
-        } catch (error) {
-            console.error('Error deleting response:', error);
-        }
-    };
-
-    return (
-        <button
-            onClick={handleDelete}
-            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm"
-        >
-            Delete
-        </button>
-    );
-};
-
-interface Manager {
-    id: string;
-    fullName: string;
-}
-
-interface Job {
-    id: string;
-    title: string;
-}
-
-interface Form {
-    id: string;
-    title: string;
-}
-
-interface Response {
-    label: string;
-    value: any;
-    fileUrl: string;
-    fieldId: string;
-    createdAt: string;
-}
-
-interface FormResponse {
-    applicantId: string;
-    createdAt: string;
-    responses: Response[];
-}
-
-interface ApiResponse {
-    data: FormResponse[];
-    total: number;
-    page: number;
-    limit: number;
-}
+import BackButton from '@/app/components/backbutton';
 
 const FormResponsesPage = () => {
     const router = useRouter();
@@ -100,12 +13,7 @@ const FormResponsesPage = () => {
     const [selectedManagerId, setSelectedManagerId] = useState<string | null>(null);
     const [jobs, setJobs] = useState<Job[]>([]);
     const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
-    const [selectedTemplate, setSelectedTemplate] = useState<FormTemplate | null>(null);
-    const [isEditing, setIsEditing] = useState(false);
-
-    const [editedTemplate, setEditedTemplate] = useState<FormTemplate | null>(null);
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState<string | null>(null);
     const [forms, setForms] = useState<Form[]>([]);
     const [selectedFormId, setSelectedFormId] = useState<string | null>(null);
     const [responsesData, setResponsesData] = useState<ApiResponse | null>(null);
@@ -113,6 +21,7 @@ const FormResponsesPage = () => {
     const [fetchError, setFetchError] = useState<string | null>(null);
 
     const fetchManagers = async () => {
+        // Fetch Managers
         try {
             const response = await api.get('/managers');
             setManagers(response.data);
@@ -122,6 +31,7 @@ const FormResponsesPage = () => {
     };
 
     const fetchJobsByManager = async () => {
+        // Fetch Jobs by Manager
         if (!selectedManagerId) {
             setJobs([]);
             return;
@@ -139,6 +49,7 @@ const FormResponsesPage = () => {
     };
 
     const fetchFormsByJobAndManager = async () => {
+        // Fetch Forms by Job and Manager
         if (!selectedManagerId || !selectedJobId) {
             setForms([]);
             setSelectedFormId(null);
@@ -146,6 +57,7 @@ const FormResponsesPage = () => {
             return;
         }
         try {
+            // Fetch Forms
             const response = await api.get(`/forms?jobId=${selectedJobId}&managerId=${selectedManagerId}`);
             setForms(response.data);
             console.log(response.data);
@@ -165,6 +77,7 @@ const FormResponsesPage = () => {
 
 
     const fetchFormResponses = async () => {
+        // Fetch Form Responses
         if (!selectedManagerId || !selectedFormId) {
             setResponsesData(null);
             return;
@@ -209,9 +122,6 @@ const FormResponsesPage = () => {
         const newJobId = e.target.value;
         setSelectedJobId(newJobId);
         setTemplates([]);
-        setSelectedTemplate(null);
-        setIsEditing(false);
-        setEditedTemplate(null);
     };
 
     const handleFormChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -221,11 +131,10 @@ const FormResponsesPage = () => {
     };
 
     return (
-        <div className="p-6 max-w-7xl mx-auto min-h-screen">
+        <div className="relative p-6 max-w-7xl mx-auto min-h-screen">
+            <BackButton />
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">Form Responses</h2>
-
             {fetchError && <p className="text-red-500 mb-4">{fetchError}</p>}
-
             <div className="mb-4">
                 <label htmlFor="managerSelect" className="block text-gray-700 text-sm font-bold mb-2">
                     Select Manager:
@@ -288,7 +197,7 @@ const FormResponsesPage = () => {
                     </select>
                 </div>
             )}
-
+            {/* /// Display Form Responses */}
             {loading ? (
                 <p className="text-blue-500 italic">Loading form responses...</p>
             ) : error ? (
@@ -335,12 +244,6 @@ const FormResponsesPage = () => {
                                         ))}
                                     </td>
                                     <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                        {/* You might want to add a delete button here */}
-                                        {/* <DeleteFormResponse
-                                            applicantId={response.applicantId}
-                                            formId={selectedFormId!}
-                                            onResponseDeleted={() => fetchFormResponses()}
-                                        /> */}
                                     </td>
                                 </tr>
                             ))}

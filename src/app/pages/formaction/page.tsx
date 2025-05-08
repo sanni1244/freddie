@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import CreateTemplate from '../../components/create/createaction';
 import EditTemplate from '../../components/edit/editaction';
-
 import { Manager, FormTemplate, Job } from '@/types';
+import BackButton from '@/app/components/backbutton';
 
 const FormTemplatesPage = () => {
   const [managers, setManagers] = useState<Manager[]>([]);
@@ -15,7 +15,6 @@ const FormTemplatesPage = () => {
   const [templates, setTemplates] = useState<FormTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<FormTemplate | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-
   const [editedTemplate, setEditedTemplate] = useState<FormTemplate | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -75,7 +74,7 @@ const FormTemplatesPage = () => {
         }
         const data: FormTemplate[] = response.data;
         setTemplates(data);
-        setSelectedTemplate(data.length > 0 ? data[0] : null); // Optionally select the first template
+        setSelectedTemplate(data.length > 0 ? data[0] : null);
       } catch (error: any) {
         console.error('Error fetching form templates:', error);
         setMessage(error.message || 'Failed to load form templates.');
@@ -138,7 +137,8 @@ const FormTemplatesPage = () => {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto min-h-screen">
+    <div className="relative p-6 max-w-7xl mx-auto min-h-screen">
+      <BackButton />
       <h1 className="text-3xl font-extrabold mb-8 text-blue-900 drop-shadow-md">📄 Manage Form Templates</h1>
       {message && (
         <div className="mb-4 text-sm text-red-700 bg-red-100 border border-red-300 p-3 rounded-md shadow-sm">
@@ -221,7 +221,7 @@ const FormTemplatesPage = () => {
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     placeholder={field.placeholder || ''}
                     required={field.required}
-                    readOnly // Make fields read-only for viewing
+                    readOnly
                   />
                 </div>
               ))}
@@ -249,32 +249,25 @@ const FormTemplatesPage = () => {
               onCancel={handleCancelEdit}
               form={editedTemplate}
               onFormUpdated={() => { }}
-/>
-
-
-
-
-
-              </div>
+            />
           </div>
+        </div>
       )}
 
-          {selectedManagerId && selectedJobId && !isEditing && (
-            <div className="mt-8">
-              {/* <h2 className="text-lg font-semibold mb-4 text-gray-800">Create New Form Template</h2> */}
-              <CreateTemplate
-                onTemplateCreated={handleTemplateCreated}
-                managerId={selectedManagerId}
-                jobId={selectedJobId}
-              />
-            </div>
-          )}
-
-          {selectedManagerId && selectedJobId && templates.length === 0 && !loading && !isEditing && (
-            <p className="text-gray-600">No job application forms available for the selected job. You can create one below.</p>
-          )}
+      {selectedManagerId && selectedJobId && !isEditing && (
+        <div className="mt-8">
+          <CreateTemplate
+            onTemplateCreated={handleTemplateCreated}
+            managerId={selectedManagerId}
+            jobId={selectedJobId}
+          />
         </div>
-      );
+      )}
+      {selectedManagerId && selectedJobId && templates.length === 0 && !loading && !isEditing && (
+        <p className="text-gray-600">No job application forms available for the selected job. You can create one below.</p>
+      )}
+    </div>
+  );
 };
 
-      export default FormTemplatesPage;
+export default FormTemplatesPage;

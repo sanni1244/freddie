@@ -13,7 +13,6 @@ interface DisplayFormActionsProps {
 }
 
 const DisplayFormActions: React.FC<DisplayFormActionsProps> = ({ formTemplates, onEdit, onDelete, setLoading, setMessage, managerId }) => {
-    // Moved handleDelete here, so it has access to the correct props
     const handleDelete = async (formTemplateId: string) => {
         if (!managerId) {
             setMessage('Manager ID is required to delete a form template.');
@@ -21,13 +20,12 @@ const DisplayFormActions: React.FC<DisplayFormActionsProps> = ({ formTemplates, 
         }
         setLoading(true);
         try {
-            // Use api.delete here
-            const response = await api.delete(`/form-templates/${formTemplateId}?managerId=${managerId}`);  // Removed api
-            if (response.status !== 200) { // Removed response.status check
-                const errorData = response.data; // Removed errorData
+            const response = await api.delete(`/form-templates/${formTemplateId}?managerId=${managerId}`);
+            if (response.status !== 200) {
+                const errorData = response.data; 
                 throw new Error(errorData.message || 'Failed to delete form template.');
             }
-            onDelete(formTemplateId);  // Removed onDelete, we will refetch in parent
+            onDelete(formTemplateId); 
             setMessage('Form template deleted successfully.');
             onDelete(formTemplateId);
 

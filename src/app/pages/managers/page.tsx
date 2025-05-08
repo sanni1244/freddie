@@ -8,6 +8,7 @@ import EditManager from '../../components/edit/editmanager';
 import SuccessMessage from '@/app/components/success';
 import ErrorMessage from '@/app/components/error';
 import api from '@/lib/api';
+import BackButton from '@/app/components/backbutton';
 
 const ManagersPage = () => {
   const [managers, setManagers] = useState<Managerdetails[]>([]);
@@ -65,7 +66,8 @@ const ManagersPage = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="relative p-6">
+      <BackButton />
       <h1 className="text-3xl font-bold mb-8 text-center ">
         Managers
       </h1>

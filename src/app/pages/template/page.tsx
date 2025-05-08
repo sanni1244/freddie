@@ -4,10 +4,12 @@ import React, { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import CreateTemplate from '@/app/components/create/createtemplate';
 import EditTemplate from '@/app/components/edit/edittemplate';
-import DisplayFormTemplates from '@/app/components/display/displayaction'; 
+import DisplayFormTemplates from '@/app/components/display/displayaction';
 import { Manager, FormTemplate } from '@/types';
+import BackButton from '@/app/components/backbutton';
 
 const FormTemplatesPage = () => {
+    // Define state variables
     const [managers, setManagers] = useState<Manager[]>([]);
     const [selectedManagerId, setSelectedManagerId] = useState<string | null>(null);
     const [templates, setTemplates] = useState<FormTemplate[]>([]);
@@ -15,9 +17,10 @@ const FormTemplatesPage = () => {
     const [editedTemplate, setEditedTemplate] = useState<FormTemplate | null>(null);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
-    const [jobId, setJobId] = useState<string | null>(null); // Add jobId to state
+    const [jobId, setJobId] = useState<string | null>(null);
 
     useEffect(() => {
+        // Fetch managers from the API
         const fetchManagers = async () => {
             try {
                 const response = await api.get('/managers');
@@ -31,10 +34,10 @@ const FormTemplatesPage = () => {
     }, []);
 
     useEffect(() => {
+        // Fetch form templates when selectedManagerId changes
         const urlParams = new URLSearchParams(window.location.search);
         const jobIdFromUrl = urlParams.get('jobId');
-        setJobId(jobIdFromUrl); // Set the jobId state
-
+        setJobId(jobIdFromUrl);
         const fetchTemplates = async () => {
             if (!jobIdFromUrl || !selectedManagerId) {
                 setTemplates([]);
@@ -43,6 +46,7 @@ const FormTemplatesPage = () => {
             setLoading(true);
             setMessage(null);
             try {
+                // Fetch form templates for the selected manager
                 const response = await api.get(`/form-templates?jobId=${jobIdFromUrl}&managerId=${selectedManagerId}`);
                 if (response.status !== 200) {
                     throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
@@ -59,37 +63,43 @@ const FormTemplatesPage = () => {
         fetchTemplates();
     }, [selectedManagerId]);
 
+    // Handle manager selection change
     const handleManagerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedManagerId(e.target.value);
     };
 
+    // Handle template creation, update, and deletion
     const handleTemplateCreated = (newTemplate: FormTemplate) => {
         setTemplates((prevTemplates) => [...prevTemplates, newTemplate]);
     };
 
+    // Handle template update
     const handleTemplateUpdated = (updatedTemplate: FormTemplate) => {
         setTemplates((prevTemplates) =>
             prevTemplates.map((template) => (template.id === updatedTemplate.id ? updatedTemplate : template))
         );
     };
 
+    // Handle template edit
     const handleEdit = (template: FormTemplate) => {
         setIsEditing(true);
         setEditedTemplate(template);
     };
 
+    // Handle cancel edit
     const handleCancelEdit = () => {
         setIsEditing(false);
         setEditedTemplate(null);
     };
 
+    // Handle template deletion
     const handleTemplateDeleted = async (templateId: string) => {
-         setLoading(true);
+        setLoading(true);
         setMessage(null);
         try {
-            // Use api.delete to delete a template
+            // Delete the template using the API
             const response = await api.delete(`/form-templates/${templateId}`);
-             if (response.status !== 200) { 
+            if (response.status !== 200) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             setMessage('Template deleted successfully.');
@@ -97,12 +107,12 @@ const FormTemplatesPage = () => {
             if (selectedManagerId) {
                 const fetchResponse = await fetch(`https://api-freddie.ai-wk.com/form-templates?managerId=${selectedManagerId}`);
                 if (!fetchResponse.ok) {
-                  throw new Error(`HTTP error! status: ${fetchResponse.status}`);
+                    throw new Error(`HTTP error! status: ${fetchResponse.status}`);
                 }
                 const data: FormTemplate[] = await fetchResponse.json();
                 setTemplates(data);
             }
-        } catch (error:any) {
+        } catch (error: any) {
             console.error('Error deleting form template:', error);
             setMessage(error.message || 'Failed to delete form template.');
         } finally {
@@ -123,7 +133,8 @@ const FormTemplatesPage = () => {
     }
 
     return (
-        <div className="p-6 max-w-7xl mx-auto bg-gradient-to-b from-white to-blue-50 min-h-screen">
+        <div className="relative p-6 max-w-7xl mx-auto bg-gradient-to-b from-white to-blue-50 min-h-screen">
+            <BackButton />
             <h1 className="text-3xl font-extrabold mb-8 text-blue-900 drop-shadow-md">📄 Manage Form Templates</h1>
             {message && (
                 <div className="mb-4 text-sm text-red-700 bg-red-100 border border-red-300 p-3 rounded-md shadow-sm">
@@ -147,6 +158,7 @@ const FormTemplatesPage = () => {
             </div>
             {loading && <p className="text-blue-600 font-medium animate-pulse">Loading...</p>}
 
+            {/* // Display form templates only if a manager is selected */}
             {selectedManagerId && !isEditing && (
                 <>
                     <CreateTemplate
@@ -155,6 +167,8 @@ const FormTemplatesPage = () => {
                         setMessage={setMessage}
                         selectedManagerId={selectedManagerId}
                     />
+
+                    {/* // Display existing templates for the selected manager */}
                     {templates.length > 0 ? (
                         <div className="mt-8">
                             <h2 className="text-2xl font-semibold text-blue-900 mb-4">Existing Templates</h2>
@@ -172,7 +186,7 @@ const FormTemplatesPage = () => {
                     )}
                 </>
             )}
-
+{/* // Display the edit template form if isEditing is true and editedTemplate is not null */}
             {isEditing && editedTemplate && selectedManagerId && (
                 <EditTemplate
                     template={editedTemplate}

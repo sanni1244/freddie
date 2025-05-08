@@ -140,10 +140,31 @@ export interface FormGroup {
 }
 
 
-interface EditFormProps {
-  initialTemplate: string; // or FormTemplate if you changed it
+export interface EditFormProps {
+  initialTemplate: string; 
   managerId: string | null;
   jobId: string | null;
   onTemplateUpdated: (updatedTemplate: FormTemplate) => void;
   onCancel: () => void;
+}
+
+export interface Response {
+    label: string;
+    value: any;
+    fileUrl: string;
+    fieldId: string;
+    createdAt: string;
+}
+
+export interface FormResponse {
+    applicantId: string;
+    createdAt: string;
+    responses: Response[];
+}
+
+export interface ApiResponse {
+    data: FormResponse[];
+    total: number;
+    page: number;
+    limit: number;
 }
