@@ -124,13 +124,6 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
         });
     };
 
-    const addGroup = () => {
-        setNewTemplate(prev => ({
-            ...prev,
-            groups: [...(prev.groups || []), { id: crypto.randomUUID(), title: '', sortOrder: 0, fields: [] }],
-        }));
-    };
-
     const removeGroup = (index: number) => {
         setNewTemplate(prevTemplate => {
             const newGroups = prevTemplate.groups ? prevTemplate.groups.filter((_, i) => i !== index) : [];
@@ -320,7 +313,6 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
                 <button
                     type="button"
                     className="bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded-md shadow-sm"
-                    onClick={addGroup}
                 >
                     Add Group
                 </button>
