@@ -5,9 +5,13 @@ export default {
       '^@/(.*)$': '<rootDir>/$1', 
     },
     setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
-    "compilerOptions": {
-    "types": ["jest", "@testing-library/jest-dom"]
-  }
+        "compilerOptions": {
+          "baseUrl": "./src", // Ensure the baseUrl is set to the 'src' folder
+          "paths": {
+            "@/*": ["*"]
+          }
+      }
   };
+  
   
   
