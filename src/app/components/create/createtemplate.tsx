@@ -10,15 +10,6 @@ interface CreateTemplateProps {
     selectedManagerId: string | null;
 }
 
-interface Field {
-    label: string;
-    type: string;
-    options?: string[] | string; 
-    required?: boolean;
-    applicantFieldMapping?: string;
-    sortOrder?: number;
-}
-
 const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setLoading, setMessage, selectedManagerId }) => {
     const [newTemplate, setNewTemplate] = useState<Partial<Omit<FormTemplate, 'id'>>>({
         title: '',
@@ -130,7 +121,6 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
             groups: [...(prev.groups ?? []), { title: '', sortOrder: 0, fields: [] }],
         }) as Partial<FormTemplate>);
     };
-    
 
     const removeGroup = (index: number) => {
         setNewTemplate(prevTemplate => {
@@ -146,7 +136,7 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
                 const updatedFields = [...(newGroups[groupIndex].fields || []), {
                     label: '',
                     type: 'text',
-                    options: [], // Initialize as empty array.  The previous code had a problem where it would sometimes initialize as ''
+                    options: [], // Initialize as empty array.  
                     required: false,
                     applicantFieldMapping: 'none',
                     sortOrder: 0
@@ -239,8 +229,7 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
                                             className="border border-gray-300 p-2 rounded-lg shadow-sm"
                                             name={`${groupIndex}-${fieldIndex}-type`}
                                             value={field.type || 'text'}
-                                            onChange={handleFieldInputChange}
-                                        >
+                                            onChange={handleFieldInputChange}>
                                             <option value="text">Text</option>
                                             <option value="textarea">Text Area</option>
                                             <option value="url">URL</option>
@@ -257,7 +246,6 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
                                             <option value="radio">Radio</option>
                                             <option value="email">Email</option>
                                             <option value="document">Document</option>
-                                            {/* Add more field types as needed */}
                                         </select>
                                         <input
                                             className="border border-gray-300 p-2 rounded-lg shadow-sm"
@@ -301,8 +289,7 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
                                         <button
                                             type="button"
                                             className="bg-red-500 hover:bg-red-700 text-white px-2 py-1 rounded-md shadow-sm"
-                                            onClick={() => removeFieldFromGroup(groupIndex, fieldIndex)}
-                                        >
+                                            onClick={() => removeFieldFromGroup(groupIndex, fieldIndex)}>
                                             Remove Field
                                         </button>
                                     </div>

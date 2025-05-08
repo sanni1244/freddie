@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter, useParams, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { FormTemplate } from '@/types';
 import api from '@/lib/api';
 
@@ -95,8 +95,6 @@ interface ApiResponse {
 
 const FormResponsesPage = () => {
     const router = useRouter();
-    const { formId: routeFormId } = useParams();
-    const searchParams = useSearchParams();
     const [templates, setTemplates] = useState<FormTemplate[]>([]);
     const [managers, setManagers] = useState<Manager[]>([]);
     const [selectedManagerId, setSelectedManagerId] = useState<string | null>(null);
@@ -109,14 +107,10 @@ const FormResponsesPage = () => {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
     const [forms, setForms] = useState<Form[]>([]);
-    const [selectedFormId, setSelectedFormId] = useState<string | null>(
-        typeof routeFormId === 'string' ? routeFormId : null
-    );
+    const [selectedFormId, setSelectedFormId] = useState<string | null>(null);
     const [responsesData, setResponsesData] = useState<ApiResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [fetchError, setFetchError] = useState<string | null>(null);
-    const [page, setPage] = useState(parseInt(searchParams.get('page') || '1', 10));
-    const [limit] = useState(parseInt(searchParams.get('limit') || '20', 10));
 
     const fetchManagers = async () => {
         try {
@@ -155,10 +149,7 @@ const FormResponsesPage = () => {
             const response = await api.get(`/forms?jobId=${selectedJobId}&managerId=${selectedManagerId}`);
             setForms(response.data);
             console.log(response.data);
-            if (routeFormId && typeof routeFormId === 'string' &&
-                response.data.some((form: Form) => form.id === routeFormId)) {
-                setSelectedFormId(routeFormId);
-            } else if (response.data.length > 0) {
+            if (response.data.length > 0) {
                 setSelectedFormId(response.data[0].id);
             } else {
                 setSelectedFormId(null);
@@ -204,11 +195,11 @@ const FormResponsesPage = () => {
 
     useEffect(() => {
         fetchFormsByJobAndManager();
-    }, [selectedManagerId, selectedJobId, routeFormId]);
+    }, [selectedManagerId, selectedJobId]);
 
     useEffect(() => {
         fetchFormResponses();
-    }, [selectedManagerId, selectedFormId, limit, page]);
+    }, [selectedManagerId, selectedFormId]);
 
     const handleManagerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedManagerId(e.target.value);
@@ -355,14 +346,6 @@ const FormResponsesPage = () => {
                             ))}
                         </tbody>
                     </table>
-
-                    {responsesData.total > 0 && (
-                        <div className="px-5 py-3 bg-white border-t flex flex-col xs:flex-row items-center xs:justify-between">
-                            <span className="text-xs text-gray-500">
-                                Page {page} of {Math.ceil(responsesData.total / responsesData.limit)}
-                            </span>
-                        </div>
-                    )}
                 </div>
             ) : selectedManagerId && selectedFormId && !loading && !error ? (
                 <p className="text-gray-600">No responses found for the selected manager and form.</p>
