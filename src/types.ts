@@ -59,12 +59,6 @@ export interface FormField {
   sortOrder: number;
 }
 
-export interface FormGroup {
-  id: string;
-  title: string;
-  fields: FormField[];
-  sortOrder: number;
-}
 
 export interface FormTemplate {
   id: string;
@@ -140,7 +134,6 @@ export interface LocalField {
 
 
 export interface FormGroup {
-  id: string;
   title: string;
   sortOrder: number;
   fields: FormField[];

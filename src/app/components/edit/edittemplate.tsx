@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
-import { FormTemplate, Group, Field } from '@/types'; // Assuming these types exist
+import { FormTemplate, FormGroup, Field } from '@/types'; // Assuming these types exist
 import api from '@/lib/api'; // Assuming this is a properly configured API client
 
 interface EditTemplateProps {
@@ -143,9 +143,10 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
     const handleAddGroup = useCallback(() => {
         setEditedTemplate(prev => ({
             ...prev,
-            groups: [...(prev.groups || []), { title: '', sortOrder: 0, fields: [] }],
-        }));
+            groups: [...(prev.groups ?? []), { title: '', sortOrder: 0, fields: [] }]
+        }) as Partial<FormTemplate>);
     }, []);
+    
 
     const removeGroup = (index: number) => {
         setEditedTemplate(prevTemplate => {
