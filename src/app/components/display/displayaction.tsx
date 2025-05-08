@@ -14,6 +14,7 @@ interface DisplayFormActionsProps {
 
 const DisplayFormActions: React.FC<DisplayFormActionsProps> = ({ formTemplates, onEdit, onDelete, setLoading, setMessage, managerId }) => {
     const handleDelete = async (formTemplateId: string) => {
+        // Check if a manager is selected
         if (!managerId) {
             setMessage('Manager ID is required to delete a form template.');
             return;

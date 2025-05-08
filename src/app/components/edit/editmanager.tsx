@@ -11,6 +11,7 @@ const EditManager: React.FC<EditManagerProps> = ({ manager, onManagerUpdated, on
   }, [manager]);
 
   const isValidManager = (manager: Partial<Managerdetails>) => {
+    // Check if all required fields are filled
     const requiredFields = [
       manager.fullName?.trim(),
       manager.companyName?.trim(),
@@ -19,6 +20,7 @@ const EditManager: React.FC<EditManagerProps> = ({ manager, onManagerUpdated, on
   };
 
   const handleSaveEdit = async () => {
+    // Validate the edited manager object before sending it to the API
     if (!editedManager || !editedManager.id) {
       setMessage('Something went wrong.');
       return;

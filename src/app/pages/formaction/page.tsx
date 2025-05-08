@@ -20,6 +20,7 @@ const FormTemplatesPage = () => {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    // Fetch managers on component mount
     const fetchManagers = async () => {
       try {
         const response = await api.get('/managers');
@@ -33,6 +34,7 @@ const FormTemplatesPage = () => {
   }, []);
 
   useEffect(() => {
+    // Fetch jobs when a manager is selected
     const fetchJobs = async () => {
       if (!selectedManagerId) {
         setJobs([]);
@@ -42,6 +44,7 @@ const FormTemplatesPage = () => {
       setLoading(true);
       setMessage(null);
       try {
+        // Fetch jobs for the selected manager
         const response = await api.get(`/jobs?managerId=${selectedManagerId}`);
         if (response.status !== 200) {
           throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
@@ -68,6 +71,7 @@ const FormTemplatesPage = () => {
       setLoading(true);
       setMessage(null);
       try {
+        // Fetch form templates for the selected job and manager
         const response = await api.get(`/form-templates?jobId=${selectedJobId}&managerId=${selectedManagerId}`);
         if (response.status !== 200) {
           throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
@@ -86,6 +90,7 @@ const FormTemplatesPage = () => {
   }, [selectedManagerId, selectedJobId]);
 
   const handleManagerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    // Clear previous messages and update the state
     setSelectedManagerId(e.target.value);
     setSelectedJobId(null);
     setTemplates([]);
@@ -95,6 +100,7 @@ const FormTemplatesPage = () => {
   };
 
   const handleJobChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    // Clear previous messages and update the state
     setSelectedJobId(e.target.value);
     setTemplates([]);
     setSelectedTemplate(null);
@@ -103,6 +109,7 @@ const FormTemplatesPage = () => {
   };
 
   const handleTemplateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    // Clear previous messages and update the state
     const templateId = e.target.value;
     const selected = templates.find((template) => template.id === templateId);
     setSelectedTemplate(selected || null);
@@ -161,6 +168,8 @@ const FormTemplatesPage = () => {
         </select>
       </div>
 
+
+{/* // Display jobs if a manager is selected */}
       {selectedManagerId && (
         <div className="mb-8">
           <label className="block mb-2 text-sm font-semibold text-gray-700">Select Job</label>
@@ -182,6 +191,7 @@ const FormTemplatesPage = () => {
 
       {loading && <p className="text-blue-600 font-medium animate-pulse">Loading...</p>}
 
+{/* // Display templates if a job is selected */}
       {selectedManagerId && selectedJobId && templates.length > 0 && (
         <div className="mb-8">
           <label className="block mb-2 text-sm font-semibold text-gray-700">Select Application Form</label>
@@ -200,6 +210,7 @@ const FormTemplatesPage = () => {
         </div>
       )}
 
+{/* // Display selected template details if available */}
       {selectedTemplate && !isEditing && (
         <div className="bg-gray-100 p-8 rounded-md shadow-md mb-8">
           <h1 className="text-2xl font-bold text-gray-800 mb-6">{selectedTemplate.title}</h1>
@@ -238,6 +249,7 @@ const FormTemplatesPage = () => {
         </div>
       )}
 
+{/* // Display edit form if editing */}
       {isEditing && editedTemplate && (
         <div className="">
           <div className="">
@@ -254,6 +266,7 @@ const FormTemplatesPage = () => {
         </div>
       )}
 
+{/* //  create form if not editing */}
       {selectedManagerId && selectedJobId && !isEditing && (
         <div className="mt-8">
           <CreateTemplate

@@ -43,6 +43,7 @@ const ManagersPage = () => {
   };
 
   const handleUpdateManager = (updatedManager: Managerdetails) => {
+    // Update the manager in the state
     setManagers((prevManagers) =>
       prevManagers.map((m) => (m.id === updatedManager.id ? updatedManager : m))
     );
@@ -52,12 +53,14 @@ const ManagersPage = () => {
   };
 
   const handleDeleteManager = (managerId: string) => {
+    // Delete the manager from the state
     setManagers((prevManagers) => prevManagers.filter((m) => m.id !== managerId));
     setMessage('Manager deleted!');
     fetchManagers();
   };
 
   const handleEdit = (manager: Managerdetails) => {
+    // Set the manager to be edited
     setEditManager(manager);
   };
 
@@ -82,7 +85,7 @@ const ManagersPage = () => {
 
       <div className="flex justify-end mb-4">
         <div  onClick={() => setOpen(true)}>
-          <button >➕ Add Manager</button>
+          <button >Add Manager</button>
         </div>
         {open && (
           <div>

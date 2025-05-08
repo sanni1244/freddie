@@ -2,81 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { FormTemplate } from '@/types';
+import { FormTemplate, Manager, Form, Job, ApiResponse, Response, FormResponse} from '@/types';
 import api from '@/lib/api';
 import BackButton from '@/app/components/backbutton';
 
-interface CreateFormProps {
-    onResponseCreated: () => void;
-    formId: string;
-    managerId: string | null;
-}
-
-const CreateFormResponse: React.FC<CreateFormProps> = ({ onResponseCreated, formId, managerId }) => {
-    const handleCreate = () => {
-        console.log('Creating new response for form:', formId, 'and manager:', managerId);
-        onResponseCreated();
-    };
-
-    return (
-        <div>
-            <button
-                onClick={handleCreate}
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            >
-                Create Response
-            </button>
-        </div>
-    );
-};
-
-interface DeleteFormResponseProps {
-    applicantId: string;
-    onResponseDeleted: () => void;
-    formId: string;
-}
-
-interface Manager {
-    id: string;
-    fullName: string;
-}
-
-interface Job {
-    id: string;
-    title: string;
-}
-
-interface Form {
-    id: string;
-    title: string;
-}
-
-interface Response {
-    label: string;
-    value: any;
-    fileUrl: string;
-    fieldId: string;
-    createdAt: string;
-}
-
-interface FormResponse {
-    id: string;
-    token: string;
-    createdAt: string;
-    isActive: boolean;
-    responses: Response[];
-}
-
-interface ApiResponse {
-    data: FormResponse[];
-    total: number;
-    page: number;
-    limit: number;
-}
-
 const FormResponsesPage = () => {
-    const router = useRouter();
-    const [templates, setTemplates] = useState<FormTemplate[]>([]);
     const [managers, setManagers] = useState<Manager[]>([]);
     const [selectedManagerId, setSelectedManagerId] = useState<string | null>(null);
     const [jobs, setJobs] = useState<Job[]>([]);
@@ -115,6 +45,7 @@ const FormResponsesPage = () => {
     };
 
     const fetchFormsByJobAndManager = async () => {
+        // Check if both selectedManagerId and selectedJobId are set
         if (!selectedManagerId || !selectedJobId) {
             setForms([]);
             setSelectedFormId(null);
@@ -122,6 +53,7 @@ const FormResponsesPage = () => {
             return;
         }
         try {
+            // Fetch forms based on selected job and manager
             const response = await api.get(`/forms?jobId=${selectedJobId}&managerId=${selectedManagerId}`);
             setForms(response.data);
             console.log(response.data);
@@ -141,6 +73,7 @@ const FormResponsesPage = () => {
 
 
     const fetchFormResponses = async () => {
+        // Check if both selectedManagerId and selectedFormId are set
         if (!selectedManagerId || !selectedFormId) {
             setResponsesData(null);
             return;
@@ -186,7 +119,6 @@ const FormResponsesPage = () => {
     const handleJobChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const newJobId = e.target.value;
         setSelectedJobId(newJobId);
-        setTemplates([]);
     };
 
     const handleFormChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -284,8 +216,8 @@ const FormResponsesPage = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {responsesData.data.map((response) => (
-                                <tr key={response.id}>
+                            {responsesData.data.map((response, index) => (
+                                <tr key={index}>
                                     <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                         {new Date(response.createdAt).toLocaleString()}
                                     </td>

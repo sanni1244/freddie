@@ -9,7 +9,7 @@ interface DisplayJobsProps {
   setMessage: React.Dispatch<React.SetStateAction<string | null>>;
   selectedManagerId: string | null;
 }
-
+/// This component is responsible for displaying the list of jobs and handling edit/delete actions
 const DisplayJobs: React.FC<DisplayJobsProps> = ({
   jobs,
   onEdit,
@@ -19,12 +19,14 @@ const DisplayJobs: React.FC<DisplayJobsProps> = ({
   selectedManagerId,
 }) => {
   const handleDelete = async (jobId: string) => {
+    // Check if a manager is selected
     if (!selectedManagerId) {
       setMessage('Please select a manager first.');
       return;
     }
     setLoading(true);
     try {
+      // Send a DELETE request to the API to delete the job
       await fetch(`/api/jobs/${jobId}?managerId=${selectedManagerId}`, { method: 'DELETE' });
       onDelete(jobId);
       setMessage('Job deleted.');

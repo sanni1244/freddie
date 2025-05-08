@@ -20,6 +20,7 @@ const IdentityPage = () => {
   const [editedIdentity, setEditedIdentity] = useState<Identity | null>(null);
 
   useEffect(() => {
+    // Fetch managers on component mount
     const fetchManagers = async () => {
       try {
         const response = await api.get('/managers');
@@ -34,6 +35,7 @@ const IdentityPage = () => {
   }, []);
 
   useEffect(() => {
+    // Fetch identities when a manager is selected
     const fetchIdentities = async () => {
       if (selectedManagerId) {
         try {
@@ -52,6 +54,7 @@ const IdentityPage = () => {
   }, [selectedManagerId]);
 
   const handleManagerChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    // Clear previous messages and update the state
     const selectedId = event.target.value;
     setSelectedManagerId(selectedId);
     const selectedManager = managers.find((manager) => manager.id === selectedId);
@@ -82,9 +85,7 @@ const IdentityPage = () => {
       <div className="container mx-auto p-8 bg-gray-50 rounded-lg shadow-lg">
         {successMessage && <SuccessMessage message={successMessage} />}
         {errorMessage && <ErrorMessage message={errorMessage} />}
-
         <h1 className="text-2xl font-semibold text-gray-800 mb-4">Select a Manager</h1>
-
         {managers.length === 0 ? (
           <p className="text-gray-500">Loading managers...</p>
         ) : (

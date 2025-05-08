@@ -12,6 +12,7 @@ interface DisplayManagerIdentitiesProps {
   setErrorMessage: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
+/// This component is for displaying the list of identities for a manager
 const DisplayManagerIdentities: React.FC<DisplayManagerIdentitiesProps> = ({
   managerId,
   identities,
@@ -23,8 +24,10 @@ const DisplayManagerIdentities: React.FC<DisplayManagerIdentitiesProps> = ({
   const [showConfirmDelete, setShowConfirmDelete] = useState<string | null>(null);
 
   const handleDelete = async (identityId: string) => {
+    // Check if the delete confirmation is shown
     if (!showConfirmDelete) return;
     try {
+      // Make the API call to delete the identity
       await api.delete(`/managers/${managerId}/identities/${identityId}`);
       onIdentityDeleted(identityId);
       setSuccessMessage('Identity deleted successfully.');

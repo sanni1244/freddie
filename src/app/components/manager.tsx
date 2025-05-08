@@ -23,6 +23,7 @@ const DisplayManager = ({
   const [showConfirmDelete, setShowConfirmDelete] = useState<string | null>(null);
 
   const handleDeleteIdentity = async (identityId: string) => {
+    // Check if the delete confirmation is shown
     if (!showConfirmDelete) return;
     try {
       await api.delete(`/managers/${selectedManagerId}/identities/${identityId}`);

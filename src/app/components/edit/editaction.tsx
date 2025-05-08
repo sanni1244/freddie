@@ -16,7 +16,7 @@ interface EditFormProps {
     onCancel: () => void;
 }
 
- 
+/// This component is for editing a form 
 const EditForm: React.FC<EditFormProps> = ({
     managerId,
     form,
@@ -131,6 +131,7 @@ const EditForm: React.FC<EditFormProps> = ({
     );
 
     const addGroup = useCallback(() => {
+        // Check if the form already has a group with the same title
         setEditedForm(prev => ({
             ...prev,
             groups: [...(prev.groups || []), { id: uuidv4(), title: '', sortOrder: 0, fields: [] }]
@@ -159,6 +160,7 @@ const EditForm: React.FC<EditFormProps> = ({
         };
 
         setEditedForm(prev => {
+            // Check if the groupIndex is null (no group selected)
             if (groupIndex === null) {
                 return {
                     ...prev,

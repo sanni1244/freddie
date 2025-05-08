@@ -159,6 +159,9 @@ export interface Response {
 export interface FormResponse {
     applicantId: string;
     createdAt: string;
+    d: string;
+  token: string;
+  isActive: boolean;
     responses: Response[];
 }
 

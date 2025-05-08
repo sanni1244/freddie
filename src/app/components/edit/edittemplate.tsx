@@ -45,6 +45,8 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
             setMessage('Please fill in all required fields.');
             return;
         }
+
+        // Prepare the payload for the API request
         const payload: Partial<FormTemplate> = {
             ...editedTemplate,
             title: editedTemplate.title?.trim(),
@@ -55,12 +57,11 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
 
         setLoading(true);
         try {
-            console.log("Payload being sent:", payload);
+            // Log the payload before sending it to the server for debugging
             const response = await api.patch(
                 `/form-templates/${editedTemplate.id}?managerId=${selectedManagerId}`,
                 payload
             );
-            console.log("Response from server:", response);
             const data: FormTemplate = response.data;
             onTemplateUpdated(data);
             setMessage('Form template updated successfully.');
@@ -74,11 +75,13 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
         }
     };
 
+    // Handle changes in the input fields
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setEditedTemplate((prev) => ({ ...prev, [name]: value }));
     };
 
+    // Handle changes in the group and field inputs
     const handleGroupChange = useCallback((groupIndex: number, fieldName: string, value: any) => {
         setEditedTemplate(prevTemplate => {
             const newGroups = prevTemplate.groups ? [...prevTemplate.groups] : [];
@@ -120,6 +123,7 @@ const EditTemplate: React.FC<EditTemplateProps> = ({
         });
     }, []);
 
+    // Handle adding a new field to a group
     const handleAddFieldToGroup = useCallback((groupIndex: number) => {
         setEditedTemplate(prevTemplate => {
             const newGroups = prevTemplate.groups ? [...prevTemplate.groups] : [];

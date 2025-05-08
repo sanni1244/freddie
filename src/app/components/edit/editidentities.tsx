@@ -12,6 +12,7 @@ interface EditIdentityProps {
   setErrorMessage: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
+/// This component is for editing an identity
 const EditIdentity: React.FC<EditIdentityProps> = ({
   managerId,
   identity,
@@ -28,6 +29,7 @@ const EditIdentity: React.FC<EditIdentityProps> = ({
 
   const handleSave = async () => {
     try {
+      // Check if the identity and manager ID are valid
       const response = await api.patch(
         `/managers/${managerId}/identities/${editedIdentity.id}`,
         editedIdentity

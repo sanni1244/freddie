@@ -11,6 +11,7 @@ interface DisplayManagersProps {
   setMessage: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
+/// This component is for displaying the list of managers
 const DisplayManagers: React.FC<DisplayManagersProps> = ({ managers, onEdit, onDelete, setLoading, setMessage }) => {
   const handleDelete = async (managerId: string) => {
     setLoading(true);

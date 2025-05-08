@@ -18,6 +18,7 @@ const JobsPage = () => {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    // Fetch managers on component mount
     const fetchManagers = async () => {
       try {
         const response = await api.get('/managers');
@@ -31,6 +32,7 @@ const JobsPage = () => {
   }, []);
 
   useEffect(() => {
+    // Fetch jobs when a manager is selected
     const fetchJobs = async () => {
       if (!selectedManagerId) {
         setJobs([]);
@@ -38,6 +40,7 @@ const JobsPage = () => {
       }
       setLoading(true);
       try {
+        // Fetch jobs for the selected manager
         const response = await api.get(`/jobs?managerId=${selectedManagerId}`);
         setJobs(response.data);
       } catch (error) {
@@ -102,6 +105,7 @@ const JobsPage = () => {
       </div>
       {loading && <p className="text-blue-600 font-medium animate-pulse">Loading...</p>}
 
+{/* // Display jobs if a manager is selected */}
       {selectedManagerId && (
         <DisplayJobs
           jobs={jobs}
@@ -113,6 +117,7 @@ const JobsPage = () => {
         />
       )}
 
+{/* // Create job form if a manager is selected and not editing */}
       {selectedManagerId && !isEditing && (
         <CreateJob
           onJobCreated={handleJobCreated}
@@ -122,6 +127,7 @@ const JobsPage = () => {
         />
       )}
 
+{/* // Edit job form if editing */}
       {isEditing && editedJob && selectedManagerId && (
         <EditJob
           job={editedJob}

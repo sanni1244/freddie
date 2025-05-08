@@ -38,6 +38,7 @@ const EditJob: React.FC<EditJobProps> = ({
   };
 
   const handleSaveEdit = async () => {
+    // Check if the job and manager ID are valid
     if (!editedJob || !editedJob.id || !selectedManagerId) {
       setMessage('Something went wrong.');
       return;
@@ -46,6 +47,8 @@ const EditJob: React.FC<EditJobProps> = ({
       setMessage('Please fill in all required fields.');
       return;
     }
+
+    // Prepare the payload for the API request
     const payload = {
       ...editedJob,
       title: editedJob.title?.trim(),

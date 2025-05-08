@@ -28,6 +28,7 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
     };
 
     const handleCreateTemplate = async () => {
+        // Check if a manager is selected
         if (!selectedManagerId) {
             setMessage('Please select a manager.');
             return;
@@ -47,6 +48,7 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
             fields: newTemplate.fields || [],
         };
 
+        // Check if groups and fields are valid
         setLoading(true);
         try {
             const response = await api.post('/form-templates', payload);
@@ -129,6 +131,7 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
         });
     };
 
+    /// Add a new field to the specified group
     const addFieldToGroup = (groupIndex: number) => {
         setNewTemplate(prevTemplate => {
             const newGroups = prevTemplate.groups ? [...prevTemplate.groups] : [];
