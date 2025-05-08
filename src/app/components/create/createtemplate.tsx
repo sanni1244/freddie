@@ -127,7 +127,7 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onTemplateCreated, setL
     const addGroup = () => {
         setNewTemplate(prev => ({
             ...prev,
-            groups: [...(prev.groups || []), { title: '', sortOrder: 0, fields: [] }],
+            groups: [...(prev.groups || []), { id: crypto.randomUUID(), title: '', sortOrder: 0, fields: [] }],
         }));
     };
 
