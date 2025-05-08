@@ -10,7 +10,7 @@ const pages = [
   { name: "Form Templates", path: "./pages/template", icon: ClipboardList },
   { name: "Form Actions", path: "./pages/formaction", icon: Send },
   { name: "Form Responses", path: "./pages/responses", icon: Activity },
-  { name: "Public Form Links", path: "/public-links", icon: Globe },
+  { name: "Public Form Links", path: "./pages/public", icon: Globe },
 ];
 
 export default function Home() {

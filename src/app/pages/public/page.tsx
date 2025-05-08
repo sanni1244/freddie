@@ -38,7 +38,7 @@ interface DeleteFormResponseProps {
 const DeleteFormResponse: React.FC<DeleteFormResponseProps> = ({ applicantId, onResponseDeleted, formId }) => {
     const handleDelete = async () => {
         try {
-            const response = await api.delete(`/forms-responses/<span class="math-inline">\{formId\}/</span>{applicantId}`);
+            const response = await api.delete(`/forms-responses/${formId}/${applicantId}`);
             if (response.status === 204) {
                 onResponseDeleted();
             }
@@ -81,8 +81,10 @@ interface Response {
 }
 
 interface FormResponse {
-    applicantId: string;
+    id: string;
+    token: string;
     createdAt: string;
+    isActive: boolean;
     responses: Response[];
 }
 
@@ -182,8 +184,9 @@ const FormResponsesPage = () => {
         setError(null);
 
         try {
-            const response = await api.get(`/forms-responses/${selectedFormId}?managerId=${selectedManagerId}&limit=20&page=1`);
+            const response = await api.get(`/form-links/public?formId=${selectedFormId}&managerId=${selectedManagerId}`);
             if (response && response.data) {
+                console.log(response.data)
                 setResponsesData(response.data);
             } else {
                 setResponsesData(null);
@@ -194,6 +197,13 @@ const FormResponsesPage = () => {
             setLoading(false);
         }
     };
+
+
+    // /forms-responses/${selectedFormId}?managerId=${selectedManagerId}                                          &limit=20&page=1`);
+    // /forms-responses/w32435                                          ?managerId=a1e2d3c4-b5a6-7d8e-9f0a-1b2c3d4e5f6g&limit=20&page=1
+    // /forms-responses/w32435?managerId=a1e2d3c4-b5a6-7d8e-9f0a-1b2c3d4e5f6g
+
+
     useEffect(() => {
         fetchManagers();
     }, []);
@@ -302,54 +312,35 @@ const FormResponsesPage = () => {
                 <p className="text-blue-500 italic">Loading form responses...</p>
             ) : error ? (
                 <p className="text-red-500">{error}</p>
-            ) : responsesData && responsesData.data.length > 0 ? (
+            ) : responsesData && responsesData.data && responsesData.data.length > 0 ? (
                 <div className="overflow-x-auto">
                     <table className="min-w-full leading-normal">
                         <thead className="bg-gray-100">
                             <tr>
                                 <th className="px-5 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    Applicant ID
+                                    Created At:
                                 </th>
                                 <th className="px-5 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    Created At
+                                    Token:
                                 </th>
                                 <th className="px-5 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    Responses
-                                </th>
-                                <th className="px-5 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    Actions
+                                    Active:
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
                             {responsesData.data.map((response) => (
-                                <tr key={response.applicantId}>
-                                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                        {response.applicantId}
-                                    </td>
+                                <tr key={response.id}>
                                     <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                         {new Date(response.createdAt).toLocaleString()}
                                     </td>
                                     <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                        {response.responses.map((res, index) => (
-                                            <div key={index} className="mb-2">
-                                                <p className="font-semibold">{res.label}:</p>
-                                                <p>{JSON.stringify(res.value)}</p>
-                                                {res.fileUrl && (
-                                                    <p className="text-gray-500 text-xs">
-                                                        File URL: {res.fileUrl}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        ))}
+                                        <div className="mb-2">
+                                            <p className="font-semibold">{response.token}</p>
+                                        </div>
                                     </td>
                                     <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                        {/* You might want to add a delete button here */}
-                                        {/* <DeleteFormResponse
-                                            applicantId={response.applicantId}
-                                            formId={selectedFormId!}
-                                            onResponseDeleted={() => fetchFormResponses()}
-                                        /> */}
+                                        <p className="text-gray-500 text-xs">{response.isActive ? "Active User" : "Offline"}</p>
                                     </td>
                                 </tr>
                             ))}
