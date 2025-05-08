@@ -9,7 +9,7 @@ const pages = [
   { name: "Jobs", path: "./pages/jobs", icon: Briefcase },
   { name: "Form Templates", path: "./pages/template", icon: ClipboardList },
   { name: "Form Actions", path: "./pages/formaction", icon: Send },
-  { name: "Form Responses", path: "/form-responses", icon: Activity },
+  { name: "Form Responses", path: "./pages/responses", icon: Activity },
   { name: "Public Form Links", path: "/public-links", icon: Globe },
 ];
 

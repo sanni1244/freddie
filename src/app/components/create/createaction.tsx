@@ -1,267 +1,314 @@
-'use client';
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import api from '@/lib/api';
-import { Form, Field, FormGroup } from '@/types';
+import { FormTemplate } from '@/types';
 
-interface CreateFormProps {
-    managerId: string;
-    onFormCreated: (newForm: Form) => void;
-    setSuccessMessage: React.Dispatch<React.SetStateAction<string | null>>;
-    setErrorMessage: React.Dispatch<React.SetStateAction<string | null>>;
+interface CreateTemplateProps {
+    onTemplateCreated: (newTemplate: FormTemplate) => void;
+    managerId: string | null;
+    jobId: string | null;
 }
 
-const CreateForm: React.FC<CreateFormProps> = ({
+const CreateTemplate: React.FC<CreateTemplateProps> = ({
+    onTemplateCreated,
     managerId,
-    onFormCreated,
-    setSuccessMessage,
-    setErrorMessage,
+    jobId,
 }) => {
-    const [newForm, setNewForm] = useState<Omit<Form, 'id' | 'createdAt'>>({
+    const [newForm, setNewForm] = useState<Partial<FormTemplate>>({
         title: '',
         formType: 'application',
-        groups: [],
+        groups: [{ id: crypto.randomUUID(), title: '', sortOrder: 1, fields: [] }],
         fields: [],
     });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleCreate = useCallback(async () => {
-        if (!managerId || !newForm.title) {
-            setErrorMessage('Title is required.');
+    const handleInputChange = (
+        event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+        const { name, value } = event.target;
+        setNewForm({ ...newForm, [name]: value });
+    };
+
+    const handleGroupInputChange = (
+        event: React.ChangeEvent<HTMLInputElement>,
+        groupIndex: number
+    ) => {
+        const { name, value } = event.target;
+        const updatedGroups = [...newForm.groups!];
+        updatedGroups[groupIndex] = { ...updatedGroups[groupIndex], [name]: value };
+        setNewForm({ ...newForm, groups: updatedGroups });
+    };
+
+    const handleAddFieldToGroup = (groupIndex: number) => {
+        const updatedGroups = [...newForm.groups!];
+        updatedGroups[groupIndex].fields.push({
+            label: '',
+            type: 'text',
+            required: false,
+            sortOrder: updatedGroups[groupIndex].fields.length + 1,
+        });
+        setNewForm({ ...newForm, groups: updatedGroups });
+    };
+
+    const handleFieldInputChange = (
+        event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+        groupIndex: number,
+        fieldIndex: number
+    ) => {
+        const { name, value, type } = event.target;
+        const updatedGroups = [...newForm.groups!];
+        const updatedField = { ...updatedGroups[groupIndex].fields[fieldIndex] };
+
+        if (type === 'checkbox') {
+            const { checked } = event.target as HTMLInputElement;
+            (updatedField as any)[name] = checked;
+        } else {
+            (updatedField as any)[name] = value;
+        }
+
+        updatedGroups[groupIndex].fields[fieldIndex] = updatedField;
+        setNewForm({ ...newForm, groups: updatedGroups });
+    };
+
+
+    const handleAddGroup = () => {
+        const updatedGroups = [...newForm.groups!];
+        updatedGroups.push({ id: crypto.randomUUID(), title: '', sortOrder: updatedGroups.length + 1, fields: [] });
+        setNewForm({ ...newForm, groups: updatedGroups });
+    };
+
+    const handleDeleteGroup = (groupIndex: number) => {
+        const updatedGroups = [...newForm.groups!];
+        updatedGroups.splice(groupIndex, 1);
+        // Re-sort the remaining groups
+        const reSortedGroups = updatedGroups.map((group, index) => ({ ...group, sortOrder: index + 1 }));
+        setNewForm({ ...newForm, groups: reSortedGroups });
+    };
+
+    const handleDeleteField = (groupIndex: number, fieldIndex: number) => {
+        const updatedGroups = [...newForm.groups!];
+        updatedGroups[groupIndex].fields.splice(fieldIndex, 1);
+        // Re-sort the remaining fields in the group
+        const reSortedFields = updatedGroups[groupIndex].fields.map((field, index) => ({ ...field, sortOrder: index + 1 }));
+        updatedGroups[groupIndex].fields = reSortedFields;
+        setNewForm({ ...newForm, groups: updatedGroups });
+    };
+
+    const handleSubmitNewForm = async () => {
+        if (!managerId || !jobId) {
+            setError('Please select a manager and job before creating a form template.');
             return;
         }
 
-        const payload: Omit<Form, 'id' | 'createdAt'> = {
-            title: newForm.title,
-            formType: newForm.formType,
-            groups: newForm.groups || [],
-            fields: newForm.fields || [],
-        };
+        if (!newForm.title) {
+            setError('Please enter a title for the form template.');
+            return;
+        }
 
+        if (!newForm.groups || newForm.groups.length === 0) {
+            setError('Please add at least one group to the form template.');
+            return;
+        }
+
+        for (const group of newForm.groups) {
+            if (!group.title) {
+                setError('Please enter a title for each group.');
+                return;
+            }
+            if (!group.fields || group.fields.length === 0) {
+                setError(`Please add at least one field to the group "${group.title}".`);
+                return;
+            }
+            for (const field of group.fields) {
+                if (!field.label) {
+                    setError(`Please enter a label for each field in the group "${group.title}".`);
+                    return;
+                }
+            }
+        }
+
+        setLoading(true);
+        setError(null);
         try {
-            const response = await api.post(`/managers/${managerId}/forms`, payload);
-            onFormCreated(response.data);
-            setSuccessMessage('Form created successfully.');
+            console.log('Submitting form data:', { ...newForm, managerId }); // Log the data being sent
+            const response = await api.post(
+                `/forms?jobId=${jobId}`,
+                { ...newForm, managerId } // Include managerId in the request body
+            );
+            console.log('API Response:', response); // Log the API response
+
+            if (response.status !== 201) {
+                throw new Error(`Failed to create form template: ${response.status} ${response.statusText}`);
+            }
+            onTemplateCreated(response.data);
             setNewForm({
                 title: '',
                 formType: 'application',
-                groups: [],
+                groups: [{ id: crypto.randomUUID(), title: '', sortOrder: 1, fields: [] }],
                 fields: [],
             });
-        } catch (error) {
-            console.error('Error creating form:', error);
+        } catch (err: any) {
+            console.error('Error creating form template:', err);
+            setError(err.message || 'Failed to create form template.');
+        } finally {
+            setLoading(false);
         }
-    }, [managerId, newForm, onFormCreated, setErrorMessage, setSuccessMessage]);
+    };
 
-    const handleInputChange = useCallback(
-        (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-            const { name, value } = e.target;
-            setNewForm(prev => ({ ...prev, [name]: value }));
-        },
-        []
-    );
-
-    const handleGroupChange = useCallback(
-        (groupIndex: number, fieldName: keyof FormGroup, value: null) => {
-            setNewForm(prevTemplate => {
-                const newGroups = [...(prevTemplate.groups || [])];
-                const updatedGroup = { ...newGroups[groupIndex], [fieldName]: value };
-                newGroups[groupIndex] = updatedGroup;
-                return { ...prevTemplate, groups: newGroups };
-            });
-        },
-        []
-    );
-
-    const handleFieldChange = useCallback(
-        (groupIndex: number | null, fieldIndex: number, fieldName: keyof Field, value: null) => {
-            setNewForm(prevTemplate => {
-                if (groupIndex === null) {
-                    const newFields = [...(prevTemplate.fields || [])];
-                    const updatedField = { ...newFields[fieldIndex], [fieldName]: value };
-                    newFields[fieldIndex] = updatedField;
-                    return { ...prevTemplate, fields: newFields };
-                } else {
-                    const newGroups = [...(prevTemplate.groups || [])];
-                    const group = { ...newGroups[groupIndex] };
-                    const fields = [...(group.fields || [])];
-                    const updatedField = { ...fields[fieldIndex], [fieldName]: value };
-                    fields[fieldIndex] = updatedField;
-                    group.fields = fields;
-                    newGroups[groupIndex] = group;
-                    return { ...prevTemplate, groups: newGroups };
-                }
-            });
-        },
-        []
-    );
-
-    const addGroup = useCallback(() => {
-        setNewForm(prev => ({
-            ...prev,
-            groups: [...(prev.groups || []), { title: '', sortOrder: 0, fields: [] }]
-        }));
-    }, []);
-
-    const removeGroup = useCallback((index: number) => {
-        setNewForm(prev => {
-            const newGroups = prev.groups ? prev.groups.filter((_, i) => i !== index) : [];
-            return { ...prev, groups: newGroups };
+    const handleCancel = () => {
+        setNewForm({
+            title: '',
+            formType: 'application',
+            groups: [{ id: crypto.randomUUID(), title: '', sortOrder: 1, fields: [] }],
+            fields: [],
         });
-    }, []);
-
-    const addFieldToGroup = useCallback((groupIndex: number | null) => {
-        setNewForm(prev => {
-            const newField: Field = {
-                label: '',
-                type: 'text',
-                options: '',
-                required: false,
-                applicantFieldMapping: '',
-                sortOrder: 0
-            };
-
-            if (groupIndex === null) {
-                return {
-                    ...prev,
-                    fields: [...(prev.fields || []), newField]
-                };
-            } else {
-                const newGroups = [...(prev.groups || [])];
-                const group = { ...newGroups[groupIndex] };
-                group.fields = [...(group.fields || []), newField];
-                newGroups[groupIndex] = group;
-                return { ...prev, groups: newGroups };
-            }
-        });
-    }, []);
-
-    const removeFieldFromGroup = useCallback((groupIndex: number | null, fieldIndex: number) => {
-        setNewForm(prev => {
-            if (groupIndex === null) {
-                return {
-                    ...prev,
-                    fields: prev.fields?.filter((_, i) => i !== fieldIndex) || []
-                };
-            } else {
-                const newGroups = [...(prev.groups || [])];
-                const group = { ...newGroups[groupIndex] };
-                group.fields = group.fields?.filter((_, i) => i !== fieldIndex) || [];
-                newGroups[groupIndex] = group;
-                return { ...prev, groups: newGroups };
-            }
-        });
-    }, []);
+    };
 
     return (
-        <div className="mt-8">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">Create a New Form</h2>
-            <input
-                type="text"
-                className="border border-gray-300 p-3 rounded-lg mb-4 w-full bg-white"
-                placeholder="Form Title"
-                name="title"
-                value={newForm.title}
-                onChange={handleInputChange}
-            />
+        <div className="container mx-auto p-6 bg-white shadow-md rounded-md">
+            <h2 className="text-2xl font-semibold mb-4">Create New Application Form Template</h2>
 
-            {/* Groups */}
-            <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Groups</label>
-                {newForm.groups?.map((group, groupIndex) => (
-                    <div key={groupIndex} className="border border-gray-300 p-4 rounded-lg shadow-sm my-4">
-                        <div className="flex justify-between items-start mb-2">
-                            <input
-                                className="border border-gray-300 p-2 rounded-lg shadow-sm w-3/4"
-                                placeholder={`Group ${groupIndex + 1} Title`}
-                                value={group.title || ''}
-                                name="title"
-                            />
-                            <button
-                                type="button"
-                                className="bg-red-500 hover:bg-red-700 text-white px-2 py-1 rounded-md shadow-sm"
-                                onClick={() => removeGroup(groupIndex)}
-                            >
-                                Remove Group
-                            </button>
-                        </div>
-                        <input
-                            className="border border-gray-300 p-2 rounded-lg shadow-sm w-full mb-2"
-                            placeholder={`Group ${groupIndex + 1} Sort Order`}
-                            type="number"
-                            name="sortOrder"
-                            value={group.sortOrder || 0}
-                        />
+            {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <strong className="font-bold">Error!</strong>
+                    <span className="block sm:inline">{error}</span>
+                </div>
+            )}
 
-                        {/* Group Fields */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Fields</label>
-                            {group.fields?.map((field, fieldIndex) => (
-                                <div key={fieldIndex} className="border border-gray-200 p-2 rounded-lg shadow-sm my-2">
-                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                                        <input
-                                            className="border border-gray-300 p-2 rounded-lg shadow-sm"
-                                            placeholder={`Field ${fieldIndex + 1} Label`}
-                                            value={field.label || ''}
-                                        />
-                                        <input
-                                            className="border border-gray-300 p-2 rounded-lg shadow-sm"
-                                            placeholder="Type"
-                                            value={field.type || ''}
-                                        />
-                                        <input
-                                            className="border border-gray-300 p-2 rounded-lg shadow-sm"
-                                            placeholder="Options"
-                                            value={field.options || ''}
-                                        />
-                                        <input
-                                            className="border border-gray-300 p-2 rounded-lg shadow-sm"
-                                            placeholder="Applicant Field Mapping"
-                                            value={field.applicantFieldMapping || ''}
-                                        />
-                                        <input
-                                            className="border border-gray-300 p-2 rounded-lg shadow-sm"
-                                            type="number"
-                                            placeholder="Sort Order"
-                                            value={field.sortOrder || 0}
-                                        />
-                                    </div>
-                                    <button
-                                        type="button"
-                                        className="text-red-500 text-sm mt-2"
-                                        onClick={() => removeFieldFromGroup(groupIndex, fieldIndex)}
-                                    >
-                                        Remove Field
-                                    </button>
-                                </div>
-                            ))}
-                            <button
-                                type="button"
-                                className="bg-blue-500 hover:bg-blue-700 text-white px-3 py-1 rounded-md mt-2"
-                                onClick={() => addFieldToGroup(groupIndex)}
-                            >
-                                Add Field
-                            </button>
-                        </div>
-                    </div>
-                ))}
-                <button
-                    type="button"
-                    className="bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded-md mt-4"
-                    onClick={addGroup}
-                >
-                    Add Group
-                </button>
+            <div className="mb-4">
+                <label htmlFor="title" className="block text-gray-700 text-sm font-bold mb-2">Title</label>
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value={newForm.title || ''}
+                    onChange={handleInputChange}
+                    placeholder="Enter form title"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
             </div>
 
-            {/* Submit */}
+            {newForm.groups?.map((group, groupIndex) => (
+                <div key={`group-${groupIndex}`} className="mb-6 border rounded-md p-4">
+                    <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-xl font-semibold">Group {groupIndex + 1}</h3>
+                        <button
+                            type="button"
+                            onClick={() => handleDeleteGroup(groupIndex)}
+                            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                        >
+                            Delete Group
+                        </button>
+                    </div>
+
+                    <div className="mb-4">
+                        <label htmlFor={`group-title-${groupIndex}`} className="block text-gray-700 text-sm font-bold mb-2">Group Title</label>
+                        <input
+                            type="text"
+                            id={`group-title-${groupIndex}`}
+                            name="title"
+                            value={group.title || ''}
+                            onChange={(event) => handleGroupInputChange(event, groupIndex)}
+                            placeholder="Enter group title"
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        />
+                    </div>
+
+                    <h4 className="text-lg font-semibold mb-2">Fields in this Group</h4>
+                    {group.fields?.map((field, fieldIndex) => (
+                        <div key={`field-${groupIndex}-${fieldIndex}`} className="mb-4 border rounded-md p-3">
+                            <div className="flex items-center justify-between mb-2">
+                                <label htmlFor={`field-label-${groupIndex}-${fieldIndex}`} className="block text-gray-700 text-sm font-bold">Field Label</label>
+                                <button
+                                    type="button"
+                                    onClick={() => handleDeleteField(groupIndex, fieldIndex)}
+                                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline text-xs"
+                                >
+                                    Delete Field
+                                </button>
+                            </div>
+                            <input
+                                type="text"
+                                id={`field-label-${groupIndex}-${fieldIndex}`}
+                                name="label"
+                                value={field.label || ''}
+                                onChange={(event) => handleFieldInputChange(event, groupIndex, fieldIndex)}
+                                placeholder="Enter field label"
+                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2"
+                            />
+
+                            <label htmlFor={`field-type-${groupIndex}-${fieldIndex}`} className="block text-gray-700 text-sm font-bold mb-2">Field Type</label>
+                            <select
+                                id={`field-type-${groupIndex}-${fieldIndex}`}
+                                name="type"
+                                value={field.type || 'text'}
+                                onChange={(event) => handleFieldInputChange(event, groupIndex, fieldIndex)}
+                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2"
+                            >
+                                <option value="text">Text</option>
+                                <option value="textarea">Text Area</option>
+                                <option value="url">URL</option>
+                                <option value="phone">Phone</option>
+                                <option value="city">City</option>
+                                <option value="date">Date</option>
+                                <option value="country">Country</option>
+                                <option value="state">State</option>
+                                <option value="zipcode">Zip Code</option>
+                                <option value="select">Select</option>
+                                <option value="checkbox">Checkbox</option>
+                                <option value="number">Number</option>
+                                <option value="rating">Rating</option>
+                                <option value="radio">Radio</option>
+                                <option value="email">Email</option>
+                                <option value="document">Document</option>
+                            </select>
+                            <label className="inline-flex items-center text-gray-700 text-sm">
+                                <input
+                                    type="checkbox"
+                                    name="required"
+                                    checked={field.required || false}
+                                    onChange={(event) => handleFieldInputChange(event, groupIndex, fieldIndex)}
+                                    className="form-checkbox h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500"
+                                />
+                                <span className="ml-2">Required</span>
+                            </label>
+                        </div>
+                    ))}
+                    <button
+                        type="button"
+                        onClick={() => handleAddFieldToGroup(groupIndex)}
+                        className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    >
+                        Add Field
+                    </button>
+                </div>
+            ))}
+
             <button
                 type="button"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-md mt-6"
-                onClick={handleCreate}
+                onClick={handleAddGroup}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mb-4"
             >
-                Create Form
+                Add Group
             </button>
+
+            <div className="flex items-center justify-end">
+                <button
+                    onClick={handleSubmitNewForm}
+                    disabled={loading}
+                    className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2 disabled:opacity-50"
+                >
+                    {loading ? 'Saving...' : 'Save'}
+                </button>
+                <button
+                    onClick={handleCancel}
+                    className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                >
+                    Cancel
+                </button>
+            </div>
         </div>
     );
 };
 
-export default CreateForm;
+export default CreateTemplate;

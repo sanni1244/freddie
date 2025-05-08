@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import api from '@/lib/api';
-import CreateTemplate from '../../components/create/createtemplate';
-import EditTemplate from '../../components/edit/edittemplate';
-import DisplayFormTemplates from '../../components/display/displayformtemplates'; // Import the new component
+import CreateTemplate from '@/app/components/create/createtemplate';
+import EditTemplate from '@/app/components/edit/edittemplate';
+import DisplayFormTemplates from '@/app/components/display/displayaction'; 
 import { Manager, FormTemplate } from '@/types';
 
 const FormTemplatesPage = () => {
@@ -31,9 +31,6 @@ const FormTemplatesPage = () => {
     }, []);
 
     useEffect(() => {
-        // In a real application, you would get jobId from the route or
-        // application state.  For this example, I'm simulating getting
-        // it from the URL.
         const urlParams = new URLSearchParams(window.location.search);
         const jobIdFromUrl = urlParams.get('jobId');
         setJobId(jobIdFromUrl); // Set the jobId state
@@ -86,13 +83,13 @@ const FormTemplatesPage = () => {
         setEditedTemplate(null);
     };
 
-    const handleTemplateDeleted = (templateId: string) => {
+    const handleTemplateDeleted = async (templateId: string) => {
          setLoading(true);
         setMessage(null);
         try {
-            // Use your api.delete method with the correct path
+            // Use api.delete to delete a template
             const response = await api.delete(`/form-templates/${templateId}`);
-             if (response.status !== 200) {
+             if (response.status !== 200) { 
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             setMessage('Template deleted successfully.');

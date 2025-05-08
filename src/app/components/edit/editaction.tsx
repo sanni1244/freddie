@@ -1,26 +1,31 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '@/lib/api';
-import { Form, Field, FormGroup } from '@/types';
+import { Form, Field, FormGroup, FormField, FormTemplate } from '@/types';
+import { v4 as uuidv4 } from 'uuid';
+import ErrorMessage from '@/app/components/error';
+import SuccessMessage from '@/app/components/success';
+
 
 interface EditFormProps {
-    managerId: string;
+    managerId: string | null;
+    initialTemplate: string | null;
     form: Form;
     onFormUpdated: (updatedForm: Form) => void;
+    onTemplateUpdated: (updatedTemplate: FormTemplate) => void;
     onCancel: () => void;
-    setSuccessMessage: React.Dispatch<React.SetStateAction<string | null>>;
-    setErrorMessage: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
+ 
 const EditForm: React.FC<EditFormProps> = ({
     managerId,
     form,
     onFormUpdated,
     onCancel,
-    setSuccessMessage,
-    setErrorMessage,
 }) => {
     const [editedForm, setEditedForm] = useState<Omit<Form, 'createdAt'>>(form);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     useEffect(() => {
         setEditedForm(form);
@@ -34,11 +39,18 @@ const EditForm: React.FC<EditFormProps> = ({
             );
             onFormUpdated(response.data);
             setSuccessMessage('Form updated successfully.');
-            onCancel();
-        } catch (error) {
+            setTimeout(() => {
+                setSuccessMessage(null);
+                onCancel();
+            }, 2000);
+        } catch (error: any) {
             console.error('Error saving form:', error);
+            setErrorMessage(error.message || 'Failed to update form.');
+            setTimeout(() => {
+                setErrorMessage(null);
+            }, 3000);
         }
-    }, [editedForm, managerId, onFormUpdated, setSuccessMessage, setErrorMessage, onCancel]);
+    }, [editedForm, managerId, onFormUpdated, onCancel]);
 
     const handleInputChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,11 +61,11 @@ const EditForm: React.FC<EditFormProps> = ({
     );
 
     const handleGroupChange = useCallback(
-        (groupIndex: number, fieldName: keyof FormGroup, value: null) => {
+        (groupIndex: number, fieldName: keyof FormGroup, value: string | number) => {
             setEditedForm(prev => {
                 const groups = [...(prev.groups || [])];
-                const group = groups[groupIndex] || { title: '', sortOrder: 0, fields: [] };
-                groups[groupIndex] = { ...group, [fieldName]: value };
+                if (!groups[groupIndex]) return prev;
+                groups[groupIndex] = { ...groups[groupIndex], [fieldName]: value };
                 return { ...prev, groups };
             });
         },
@@ -61,30 +73,67 @@ const EditForm: React.FC<EditFormProps> = ({
     );
 
     const handleFieldChange = useCallback(
-        (groupIndex: number | null, fieldIndex: number, fieldName: keyof Field, value: null) => {
+        (
+            groupIndex: number | null,
+            fieldIndex: number,
+            fieldName: keyof Field,
+            value: string | boolean | number
+        ) => {
             setEditedForm(prev => {
                 if (groupIndex === null) {
                     const fields = [...(prev.fields || [])];
-                    const field = { ...fields[fieldIndex], [fieldName]: value };
-                    fields[fieldIndex] = field;
+                    if (!fields[fieldIndex]) return prev;
+                    fields[fieldIndex] = { ...fields[fieldIndex], [fieldName]: value };
                     return { ...prev, fields };
                 } else {
                     const groups = [...(prev.groups || [])];
+                    if (!groups[groupIndex]) return prev;
                     const group = { ...groups[groupIndex] };
                     const fields = [...(group.fields || [])];
-                    const field = { ...fields[fieldIndex], [fieldName]: value };
-                    fields[fieldIndex] = field;
+                    if (!fields[fieldIndex]) return prev;
+                    fields[fieldIndex] = { ...fields[fieldIndex], [fieldName]: value };
                     group.fields = fields;
                     groups[groupIndex] = group;
                     return { ...prev, groups };
-                }});
-            },[]
+                }
+            });
+        },
+        []
+    );
+
+    const handleBooleanFieldChange = useCallback(
+        (
+            groupIndex: number | null,
+            fieldIndex: number,
+            fieldName: keyof Field,
+            checked: boolean
+        ) => {
+            setEditedForm(prev => {
+                if (groupIndex === null) {
+                    const fields = [...(prev.fields || [])];
+                    if (!fields[fieldIndex]) return prev;
+                    fields[fieldIndex] = { ...fields[fieldIndex], [fieldName]: checked };
+                    return { ...prev, fields };
+                } else {
+                    const groups = [...(prev.groups || [])];
+                    if (!groups[groupIndex]) return prev;
+                    const group = { ...groups[groupIndex] };
+                    const fields = [...(group.fields || [])];
+                    if (!fields[fieldIndex]) return prev;
+                    fields[fieldIndex] = { ...fields[fieldIndex], [fieldName]: checked };
+                    group.fields = fields;
+                    groups[groupIndex] = group;
+                    return { ...prev, groups };
+                }
+            });
+        },
+        []
     );
 
     const addGroup = useCallback(() => {
         setEditedForm(prev => ({
             ...prev,
-            groups: [...(prev.groups || []), { title: '', sortOrder: 0, fields: [] }]
+            groups: [...(prev.groups || []), { id: uuidv4(), title: '', sortOrder: 0, fields: [] }]
         }));
     }, []);
 
@@ -96,13 +145,17 @@ const EditForm: React.FC<EditFormProps> = ({
     }, []);
 
     const addFieldToGroup = useCallback((groupIndex: number | null) => {
-        const newField: Field = {
+        const newField: FormField = {
+            id: uuidv4(),
             label: '',
             type: 'text',
-            options: '',
             required: false,
             applicantFieldMapping: '',
-            sortOrder: 0
+            sortOrder: 0,
+            placeholder: '',
+            helpText: '',
+            defaultValue: '',
+            validationPattern: '',
         };
 
         setEditedForm(prev => {
@@ -113,6 +166,7 @@ const EditForm: React.FC<EditFormProps> = ({
                 };
             } else {
                 const groups = [...(prev.groups || [])];
+                if (!groups[groupIndex]) return prev;
                 const group = { ...groups[groupIndex] };
                 group.fields = [...(group.fields || []), newField];
                 groups[groupIndex] = group;
@@ -120,6 +174,7 @@ const EditForm: React.FC<EditFormProps> = ({
             }
         });
     }, []);
+
 
     const removeFieldFromGroup = useCallback((groupIndex: number | null, fieldIndex: number) => {
         setEditedForm(prev => {
@@ -130,6 +185,7 @@ const EditForm: React.FC<EditFormProps> = ({
                 };
             } else {
                 const groups = [...(prev.groups || [])];
+                if (!groups[groupIndex]) return prev;
                 const group = { ...groups[groupIndex] };
                 group.fields = group.fields?.filter((_, i) => i !== fieldIndex) || [];
                 groups[groupIndex] = group;
@@ -141,6 +197,8 @@ const EditForm: React.FC<EditFormProps> = ({
     return (
         <div className="mt-8">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">Edit Form</h2>
+            {errorMessage && <ErrorMessage message={errorMessage} />}
+            {successMessage && <SuccessMessage message={successMessage} />}
             <input
                 type="text"
                 className="border border-gray-300 p-3 rounded-lg mb-4 w-full bg-white"
@@ -158,12 +216,14 @@ const EditForm: React.FC<EditFormProps> = ({
                             value={group.title}
                             placeholder="Group Title"
                             className="flex-1 border p-2 rounded-lg"
+                            onChange={(e) => handleGroupChange(groupIndex, 'title', e.target.value)}
                         />
                         <input
                             type="number"
                             value={group.sortOrder}
                             placeholder="Sort Order"
                             className="w-32 border p-2 rounded-lg"
+                            onChange={(e) => handleGroupChange(groupIndex, 'sortOrder', Number(e.target.value))}
                         />
                         <button
                             type="button"
@@ -182,38 +242,42 @@ const EditForm: React.FC<EditFormProps> = ({
                                     value={field.label}
                                     placeholder="Label"
                                     className="border p-2 rounded"
-                                    
+                                    onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'label', e.target.value)}
                                 />
                                 <input
                                     type="text"
                                     value={field.type}
                                     placeholder="Type"
                                     className="border p-2 rounded"
-                                    
+                                    onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'type', e.target.value)}
                                 />
                                 <input
                                     type="text"
                                     value={field.options}
                                     placeholder="Options"
                                     className="border p-2 rounded"
+                                    onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'options', e.target.value)}
                                 />
                                 <input
                                     type="text"
                                     value={field.applicantFieldMapping}
                                     placeholder="Applicant Field Mapping"
                                     className="border p-2 rounded"
+                                    onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'applicantFieldMapping', e.target.value)}
                                 />
                                 <input
                                     type="number"
                                     value={field.sortOrder}
                                     placeholder="Sort Order"
                                     className="border p-2 rounded"
+                                    onChange={(e) => handleFieldChange(groupIndex, fieldIndex, 'sortOrder', Number(e.target.value))}
                                 />
                                 <label className="flex items-center">
                                     <input
                                         type="checkbox"
                                         checked={field.required}
                                         className="mr-2"
+                                        onChange={(e) => handleBooleanFieldChange(groupIndex, fieldIndex, 'required', e.target.checked)}
                                     />
                                     Required
                                 </label>

@@ -68,10 +68,10 @@ export interface FormGroup {
 
 export interface FormTemplate {
   id: string;
+  initialTemplate: [];
   title: string;
   name: string;
   group: string;
-  managerId: string;
   formType: string;
   groups: FormGroup[];
   fields: FormField[];
@@ -92,11 +92,11 @@ export interface Field {
   id?: string;
   label: string;
   type: string;
-  required: string[];
-  options?: string[];
+  required: boolean;
+  options: string;
   applicantFieldMapping?: string;
   sortOrder: number;
-  
+  fields: '';
 }
 
 export interface Form {
@@ -106,6 +106,7 @@ export interface Form {
   formType: string;
   groups: FormGroup[];
   fields: FormField[];
+  
 }
 
 export interface FormField {
@@ -135,4 +136,21 @@ export interface LocalField {
   required?: boolean;
   applicantFieldMapping?: string;
   sortOrder: number;
+}
+
+
+export interface FormGroup {
+  id: string;
+  title: string;
+  sortOrder: number;
+  fields: FormField[];
+}
+
+
+interface EditFormProps {
+  initialTemplate: string; // or FormTemplate if you changed it
+  managerId: string | null;
+  jobId: string | null;
+  onTemplateUpdated: (updatedTemplate: FormTemplate) => void;
+  onCancel: () => void;
 }
