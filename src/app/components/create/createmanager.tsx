@@ -87,7 +87,7 @@ const CreateManager: React.FC<CreateManagerProps> = ({ onManagerCreated, setLoad
           />
           {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>}
         </div>
-        <div>
+        <div> 
           <input
             className="border border-gray-300 p-3 rounded-lg shadow-sm w-full"
             placeholder="Email"

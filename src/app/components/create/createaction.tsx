@@ -16,7 +16,7 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({
     const [newForm, setNewForm] = useState<Partial<FormTemplate>>({
         title: '',
         formType: 'application',
-        groups: [{ id: crypto.randomUUID(), title: '', sortOrder: 1, fields: [] }],
+        groups: [{ title: '', sortOrder: 1, fields: [] }],
         fields: [],
     });
     const [loading, setLoading] = useState(false);
@@ -73,7 +73,7 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({
 
     const handleAddGroup = () => {
         const updatedGroups = [...newForm.groups!];
-        updatedGroups.push({ id: crypto.randomUUID(), title: '', sortOrder: updatedGroups.length + 1, fields: [] });
+        updatedGroups.push({ title: '', sortOrder: updatedGroups.length + 1, fields: [] });
         setNewForm({ ...newForm, groups: updatedGroups });
     };
 
@@ -130,13 +130,10 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({
         setLoading(true);
         setError(null);
         try {
-            console.log('Submitting form data:', { ...newForm, managerId }); // Log the data being sent
             const response = await api.post(
                 `/forms?jobId=${jobId}`,
-                { ...newForm, managerId } // Include managerId in the request body
+                { ...newForm, managerId }
             );
-            console.log('API Response:', response); // Log the API response
-
             if (response.status !== 201) {
                 throw new Error(`Failed to create form template: ${response.status} ${response.statusText}`);
             }
@@ -144,7 +141,7 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({
             setNewForm({
                 title: '',
                 formType: 'application',
-                groups: [{ id: crypto.randomUUID(), title: '', sortOrder: 1, fields: [] }],
+                groups: [{ title: '', sortOrder: 1, fields: [] }],
                 fields: [],
             });
         } catch (err: any) {
@@ -159,7 +156,7 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({
         setNewForm({
             title: '',
             formType: 'application',
-            groups: [{ id: crypto.randomUUID(), title: '', sortOrder: 1, fields: [] }],
+            groups: [{ title: '', sortOrder: 1, fields: [] }],
             fields: [],
         });
     };
